@@ -6,6 +6,9 @@ Audience: advanced Unity/.NET developers using Rider. Unity version pinned via R
 
 Project info located under .docs/gamedoc.md; If information in prompt conflicts with this document, use prompt information
 
+ALL SCRIPTS SHOULD BE INSIDE ASSETS/GAME/CODEBASE folder.
+Use assembly definitions for scripts to speed up compilation. At least core, gameplay and UI.
+
 ## 1. Build and Configuration
 
 - Unity version: 6000.2.2f1 (verify in ProjectSettings and Rider-generated csproj references). Using a different minor version can break package resolution or URP pipeline compatibility.
@@ -101,6 +104,10 @@ Debugging tips:
 - Use [Conditional("UNITY_EDITOR")] logs or the built-in Logger; avoid Debug.Log in performance-sensitive code paths.
 - For deterministic tests, avoid using Time.deltaTime in logic under test; inject time providers.
 
+Scenes structure
+- Game starts from scene named BootScene.
+- Main gameplay scene named Gameplay
+
 ## 4. Adding More Tests (Guidelines)
 - Prefer EditMode for pure logic; create PlayMode only when engine state or scenes are required.
 - If tests need domain reload isolation, mark with [UnitySetUp]/[UnityTearDown] or use [SetUp]/[TearDown] for standard NUnit.
@@ -124,13 +131,16 @@ Debugging tips:
 - Use C# 9 syntax where possible.
 - Order of members: serialied fields, constants, private instance fields ans private static fields, public fields and properties, events, constructors(or injection function), public methods, protected and private last.
 - Use wrapper on Unity Logger for logging. It can be static class. But avoid static methods and events in general in game logic. Statics as utility functions are ok.
-- Use VContainer for injection of global services.
+- Use VContainer for injection of global and scene-level services only
+- DO NOT use VContainer for injection of gameobject level componennts. Rely on GetComponent/InChidren instead or direct serialzed references.
 - Prefer UniTask over standart tasks.
 - For the sake of simplicity do not use addressables, use direct references or load from resources, but use abstraction to easy later migration.
 - Use pools when possible and it makes sense.
 - Use MVP pattern for UI
 - All UI screens should be managed in centralized screen service.
 - Use ScriptableObject for settings and shared configurations
+- Namespaces should start from Game and reflect folder sturcture, but avoid very deep nesting, no more than 4 levels. Do not include Codebase folder in namespace. For instance Game.UI.Screens; Game.Core;
+- Store each feature in separate folder.
 
 ## 8. Layering & Ownership
 
