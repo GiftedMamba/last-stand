@@ -141,6 +141,8 @@ Scenes structure
 - Use ScriptableObject for settings and shared configurations
 - Namespaces should start from Game and reflect folder sturcture, but avoid very deep nesting, no more than 4 levels. Do not include Codebase folder in namespace. For instance Game.UI.Screens; Game.Core;
 - Store each feature in separate folder.
+- DO NOT use FindObjectOfType.
+- Use services which are injected via VContainer to share information between systems and features and components.
 
 ## 8. Layering & Ownership
 

@@ -5,13 +5,12 @@ using UnityEngine;
 namespace Game.Gameplay.Player
 {
     /// <summary>
-    /// Spawns the Player prefab from PlayerConfig under the scene object tagged "PlayerSpawnPoint".
-    /// Place this component in the Gameplay scene and assign PlayerConfig in the inspector.
+    /// Spawns the Player prefab from PlayerConfig at the position/rotation of the GameObject this
+    /// component is attached to. No tags or scene lookups required.
+    /// Place this component on the desired spawn point and assign PlayerConfig in the inspector.
     /// </summary>
     public class PlayerSpawner : MonoBehaviour
     {
-        private const string SpawnTag = "PlayerSpawnPoint";
-
         [SerializeField] private PlayerConfig _playerConfig;
 
         private void Start()
@@ -28,19 +27,12 @@ namespace Game.Gameplay.Player
                 return;
             }
 
-            var spawnPoint = GameObject.FindWithTag(SpawnTag);
-            if (spawnPoint == null)
-            {
-                GameLogger.LogError($"PlayerSpawner: No GameObject found with tag '{SpawnTag}'. Please add one to the scene.");
-                return;
-            }
-
-            // Instantiate as a child of the spawn point, preserving intended world pose.
+            // Instantiate as a child of this transform, preserving intended world pose.
             var prefab = _playerConfig.PlayerPrefab;
-            var instance = Instantiate(prefab, spawnPoint.transform.position, spawnPoint.transform.rotation, spawnPoint.transform);
+            var instance = Instantiate(prefab, transform.position, transform.rotation, transform);
             instance.name = prefab.name; // keep clean name without (Clone)
 
-            GameLogger.Log("PlayerSpawner: Player spawned at spawn point.");
+            GameLogger.Log("PlayerSpawner: Player spawned at attached spawn point.");
         }
     }
 }
