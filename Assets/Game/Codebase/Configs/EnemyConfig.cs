@@ -17,6 +17,7 @@ namespace Game.Configs
         [SerializeField, Min(0)] private int _armor = 0; // flat armor, 6% reduction per point up to 60%
         [SerializeField, Min(0f)] private float _moveSpeed = 2f; // u/s
         [SerializeField, Min(0f)] private float _dpsToSpot = 8f; // when in contact (future use)
+        [SerializeField, Min(0)] private int _explodeDamageToTower = 10; // damage dealt to tower when enemy explodes on it
         [SerializeField] private bool _isBoss = false;
 
         public GameObject EnemyPrefab => _enemyPrefab;
@@ -24,6 +25,7 @@ namespace Game.Configs
         public int Armor => _armor;
         public float MoveSpeed => _moveSpeed;
         public float DpsToSpot => _dpsToSpot;
+        public int ExplodeDamageToTower => _explodeDamageToTower;
         public bool IsBoss => _isBoss;
     }
 }

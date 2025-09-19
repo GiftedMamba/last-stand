@@ -80,7 +80,7 @@ namespace Game.Gameplay.Enemies
                 Die();
         }
 
-        private void Die()
+        public void Die()
         {
             // TODO: notify systems via event/bus later
             Destroy(gameObject);

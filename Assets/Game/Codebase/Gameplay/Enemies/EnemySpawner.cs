@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
 using UnityEngine;
@@ -20,11 +21,31 @@ namespace Game.Gameplay.Enemies
         [SerializeField, Min(1)] private int _autoCount = 1;
         [SerializeField, Min(0f)] private float _spawnRadius = 0f; // random within radius if > 0
 
+        [Header("Random Loop Spawning")]
+        [SerializeField] private bool _spawnRandomLoop = false;
+        [SerializeField, Min(0.1f)] private float _delaySeconds = 2f;
+
+        private Coroutine _loopCoroutine;
+        
         private void Start()
         {
             if (_autoSpawnOnStart)
             {
                 SpawnAuto();
+            }
+
+            if (_spawnRandomLoop)
+            {
+                _loopCoroutine = StartCoroutine(SpawnRandomLoop());
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_loopCoroutine != null)
+            {
+                StopCoroutine(_loopCoroutine);
+                _loopCoroutine = null;
             }
         }
 
@@ -47,6 +68,38 @@ namespace Game.Gameplay.Enemies
                     pos += new Vector3(offset.x, 0f, offset.y);
                 }
                 Spawn(cfg, pos, transform.rotation);
+            }
+        }
+
+        private IEnumerator SpawnRandomLoop()
+        {
+            if (_enemyConfigs.Count == 0)
+            {
+                GameLogger.LogWarning("EnemySpawner: No enemy configs assigned for random loop.");
+                yield break;
+            }
+
+            while (true)
+            {
+                // select random config
+                int idx = Random.Range(0, _enemyConfigs.Count);
+                var cfg = _enemyConfigs[idx];
+                if (cfg == null)
+                {
+                    GameLogger.LogWarning("EnemySpawner: Encountered null EnemyConfig in list; skipping.");
+                }
+                else
+                {
+                    Vector3 pos = transform.position;
+                    if (_spawnRadius > 0f)
+                    {
+                        var offset = Random.insideUnitCircle * _spawnRadius;
+                        pos += new Vector3(offset.x, 0f, offset.y);
+                    }
+                    Spawn(cfg, pos, transform.rotation);
+                }
+
+                yield return new WaitForSeconds(Mathf.Max(0.01f, _delaySeconds));
             }
         }
 
