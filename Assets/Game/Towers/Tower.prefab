@@ -278,8 +278,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
-  _maxHp: 100
-  _currentHp: 100
+  _maxHp: 10
+  _currentHp: 10
 --- !u!1 &7459629529839954391
 GameObject:
   m_ObjectHideFlags: 0
