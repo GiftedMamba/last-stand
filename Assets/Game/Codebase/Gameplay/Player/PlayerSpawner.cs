@@ -12,6 +12,7 @@ namespace Game.Gameplay.Player
     public class PlayerSpawner : MonoBehaviour
     {
         [SerializeField] private PlayerConfig _playerConfig;
+        [SerializeField] private Game.Gameplay.Enemies.EnemyRegistry _enemyRegistry;
 
         private void Start()
         {
@@ -31,6 +32,17 @@ namespace Game.Gameplay.Player
             var prefab = _playerConfig.PlayerPrefab;
             var instance = Instantiate(prefab, transform.position, transform.rotation, transform);
             instance.name = prefab.name; // keep clean name without (Clone)
+
+            // Try wire PlayerAttack
+            var attack = instance.GetComponentInChildren<PlayerAttack>();
+            if (attack != null)
+            {
+                attack.Init(_playerConfig, _enemyRegistry);
+            }
+            else
+            {
+                GameLogger.LogWarning("PlayerSpawner: Spawned player has no PlayerAttack component.");
+            }
 
             GameLogger.Log("PlayerSpawner: Player spawned at attached spawn point.");
         }

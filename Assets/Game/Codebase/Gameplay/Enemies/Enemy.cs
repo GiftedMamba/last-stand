@@ -14,6 +14,8 @@ namespace Game.Gameplay.Enemies
         private NavMeshAgent _agent;
         private int _currentHp;
         private int _armor;
+        private TowerTarget _currentTarget;
+        private float _retargetTimer;
 
         public EnemyConfig Config => _config;
         public int CurrentHp => _currentHp;
@@ -37,6 +39,25 @@ namespace Game.Gameplay.Enemies
             AcquireAndMoveToTarget();
         }
 
+        private void Update()
+        {
+            // Periodically validate target (2 times per second) to avoid thrashing
+            _retargetTimer -= Time.deltaTime;
+            if (_retargetTimer <= 0f)
+            {
+                _retargetTimer = 0.5f;
+                if (_currentTarget == null || !_currentTarget.IsValid)
+                {
+                    AcquireAndMoveToTarget();
+                }
+                else if (_agent != null && _agent.isOnNavMesh)
+                {
+                    // Ensure destination is still set correctly (target may have moved)
+                    _agent.SetDestination(_currentTarget.Position);
+                }
+            }
+        }
+
         public void InitializeFromConfig(EnemyConfig cfg)
         {
             _config = cfg;
@@ -55,16 +76,21 @@ namespace Game.Gameplay.Enemies
 
         private void AcquireAndMoveToTarget()
         {
-            var target = TowerTarget.GetRandom();
-            if (target == null)
+            _currentTarget = TowerTarget.GetRandom();
+            if (_currentTarget == null)
             {
-                GameLogger.LogWarning("Enemy: No TowerTarget found in scene. Enemy will idle.");
+                GameLogger.LogWarning("Enemy: No valid TowerTarget found. Enemy will idle.");
+                // Optionally stop agent
+                if (_agent != null && _agent.isOnNavMesh)
+                {
+                    _agent.ResetPath();
+                }
                 return;
             }
 
             if (_agent != null && _agent.isOnNavMesh)
             {
-                _agent.SetDestination(target.Position);
+                _agent.SetDestination(_currentTarget.Position);
             }
         }
 

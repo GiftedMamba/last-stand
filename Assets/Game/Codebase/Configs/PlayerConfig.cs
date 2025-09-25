@@ -12,6 +12,7 @@ namespace Game.Configs
     {
         [Header("References")]
         [SerializeField] private GameObject _playerPrefab;
+        [SerializeField] private GameObject _projectilePrefab;
 
         [Header("Combat Base Stats")]
         [SerializeField, Min(0f)] private float _baseDamage = 10f;
@@ -19,6 +20,7 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _baseProjectileSpeed = 10f; // units per second
 
         public GameObject PlayerPrefab => _playerPrefab;
+        public GameObject ProjectilePrefab => _projectilePrefab;
         public float BaseDamage => _baseDamage;
         public float BaseAttackSpeed => _baseAttackSpeed;
         public float BaseProjectileSpeed => _baseProjectileSpeed;

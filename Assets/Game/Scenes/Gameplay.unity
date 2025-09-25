@@ -119,60 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &193773551
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 193773552}
-  - component: {fileID: 193773553}
-  m_Layer: 5
-  m_Name: GameOverController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &193773552
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 193773551}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 277656202}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &193773553
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 193773551}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 577d6d1ca7654942b9f78e3c4cadf5d6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.GameOver.GameOverController
-  _gameOverScreenPrefabName: GameOverScreen
-  _loseCondition: 1
-  _towers:
-  - {fileID: 498716138}
-  - {fileID: 1452192943}
-  - {fileID: 530020469}
 --- !u!1 &277656198
 GameObject:
   m_ObjectHideFlags: 0
@@ -267,8 +213,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 193773552}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -333,28 +278,51 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Player.PlayerSpawner
   _playerConfig: {fileID: 11400000, guid: ac37819d8742eaf47859637466abccb0, type: 2}
---- !u!114 &498716138 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
-  m_PrefabInstance: {fileID: 1139225397603631599}
+  _enemyRegistry: {fileID: 0}
+--- !u!1 &594568887
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 594568888}
+  - component: {fileID: 594568889}
+  m_Layer: 0
+  m_Name: EnemyRegistry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &594568888
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594568887}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &594568889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 594568887}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
+  m_Script: {fileID: 11500000, guid: 1e19223a5b004156bfa96c882d3283c9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
---- !u!114 &530020469 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
-  m_PrefabInstance: {fileID: 660652024}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Enemies.EnemyRegistry
 --- !u!1001 &660652024
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -412,6 +380,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+--- !u!114 &660652025 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+  m_PrefabInstance: {fileID: 660652024}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
 --- !u!1 &842623917
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,17 +742,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1452192943 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
-  m_PrefabInstance: {fileID: 1754910670}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
 --- !u!1 &1683796634
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,6 +752,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1683796636}
   - component: {fileID: 1683796635}
+  - component: {fileID: 1683796637}
   m_Layer: 0
   m_Name: GameplayScope
   m_TagString: Untagged
@@ -823,6 +792,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1683796637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683796634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 577d6d1ca7654942b9f78e3c4cadf5d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.GameOver.GameOverController
+  _gameOverScreenPrefabName: GameOverScreen
+  _loseCondition: 1
+  _towers:
+  - {fileID: 1139225397603631600}
+  - {fileID: 1754910671}
+  - {fileID: 660652025}
 --- !u!1001 &1754910670
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -880,6 +867,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+--- !u!114 &1754910671 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+  m_PrefabInstance: {fileID: 1754910670}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
 --- !u!1 &1763533581
 GameObject:
   m_ObjectHideFlags: 0
@@ -932,6 +930,7 @@ MonoBehaviour:
   _spawnRadius: 0
   _spawnRandomLoop: 1
   _delaySeconds: 5
+  _enemyRegistry: {fileID: 594568889}
 --- !u!1 &1875140218
 GameObject:
   m_ObjectHideFlags: 0
@@ -1237,6 +1236,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+--- !u!114 &1139225397603631600 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7947473565960322741, guid: 45fe69fb51c46f34388ade91a9a6188c, type: 3}
+  m_PrefabInstance: {fileID: 1139225397603631599}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1253,3 +1263,4 @@ SceneRoots:
   - {fileID: 1763533582}
   - {fileID: 277656202}
   - {fileID: 1019290415}
+  - {fileID: 594568888}

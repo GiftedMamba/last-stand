@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PlayerConfig
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.PlayerConfig
   _playerPrefab: {fileID: 6931717683036688701, guid: 325cf6d5d2705ee4aa733dbc3be98390, type: 3}
+  _projectilePrefab: {fileID: 6856017517542066261, guid: 903a624da69b814439bc594fae33036a, type: 3}
   _baseDamage: 10
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 10

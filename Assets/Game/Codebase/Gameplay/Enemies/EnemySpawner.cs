@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
+using Game.Gameplay.GameOver;
 using UnityEngine;
 
 namespace Game.Gameplay.Enemies
@@ -25,10 +26,25 @@ namespace Game.Gameplay.Enemies
         [SerializeField] private bool _spawnRandomLoop = false;
         [SerializeField, Min(0.1f)] private float _delaySeconds = 2f;
 
+        [Header("Runtime References")]
+        [SerializeField] private EnemyRegistry _enemyRegistry;
+
         private Coroutine _loopCoroutine;
+        private bool _stopped;
+
+        private void OnEnable()
+        {
+            GameOverController.GameOverShown += HandleGameOver;
+        }
         
         private void Start()
         {
+            if (GameOverController.IsGameOver)
+            {
+                _stopped = true;
+                return;
+            }
+
             if (_autoSpawnOnStart)
             {
                 SpawnAuto();
@@ -42,6 +58,17 @@ namespace Game.Gameplay.Enemies
 
         private void OnDisable()
         {
+            GameOverController.GameOverShown -= HandleGameOver;
+            if (_loopCoroutine != null)
+            {
+                StopCoroutine(_loopCoroutine);
+                _loopCoroutine = null;
+            }
+        }
+
+        private void HandleGameOver()
+        {
+            _stopped = true;
             if (_loopCoroutine != null)
             {
                 StopCoroutine(_loopCoroutine);
@@ -51,6 +78,7 @@ namespace Game.Gameplay.Enemies
 
         public void SpawnAuto()
         {
+            if (_stopped) return;
             if (_enemyConfigs.Count == 0)
             {
                 GameLogger.LogWarning("EnemySpawner: No enemy configs assigned.");
@@ -79,7 +107,7 @@ namespace Game.Gameplay.Enemies
                 yield break;
             }
 
-            while (true)
+            while (!_stopped)
             {
                 // select random config
                 int idx = Random.Range(0, _enemyConfigs.Count);
@@ -107,6 +135,7 @@ namespace Game.Gameplay.Enemies
 
         public Enemy Spawn(EnemyConfig config, Vector3 position, Quaternion rotation)
         {
+            if (_stopped) return null;
             if (config == null || config.EnemyPrefab == null)
             {
                 GameLogger.LogError("EnemySpawner: Config or prefab is null.");
@@ -125,6 +154,14 @@ namespace Game.Gameplay.Enemies
             }
 
             enemy.InitializeFromConfig(config);
+
+            // Register with EnemyRegistry if assigned
+            if (_enemyRegistry != null)
+            {
+                var handle = go.GetComponent<EnemyRegistryHandle>();
+                if (handle == null) handle = go.AddComponent<EnemyRegistryHandle>();
+                handle.Init(_enemyRegistry, enemy);
+            }
             return enemy;
         }
     }

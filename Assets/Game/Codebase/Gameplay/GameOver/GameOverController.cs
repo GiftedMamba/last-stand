@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Game.Gameplay.Towers;
 using Game.UI.Screens;
 using UnityEngine;
@@ -12,6 +13,9 @@ namespace Game.Gameplay.GameOver
     /// </summary>
     public sealed class GameOverController : MonoBehaviour
     {
+        public static event Action GameOverShown;
+        public static bool IsGameOver { get; private set; }
+
         public enum LoseCondition
         {
             AnyTowerDestroyed,
@@ -38,20 +42,31 @@ namespace Game.Gameplay.GameOver
 
         private void OnEnable()
         {
+            IsGameOver = false;
             _subscribed.Clear();
             _aliveCount = 0;
 
-            if (_towers != null)
+            // Validate towers assignment early
+            if (_towers == null || _towers.Length == 0)
             {
-                foreach (var t in _towers)
+                Game.Core.GameLogger.LogError("GameOverController: No towers assigned in inspector. Please assign at least one TowerHealth reference.");
+                return;
+            }
+
+            foreach (var t in _towers)
+            {
+                if (t == null) continue;
+                if (_subscribed.Add(t))
                 {
-                    if (t == null) continue;
-                    if (_subscribed.Add(t))
-                    {
-                        t.OnDied += OnTowerDied;
-                    }
-                    if (!t.IsDead) _aliveCount++;
+                    t.OnDied += OnTowerDied;
                 }
+                if (!t.IsDead) _aliveCount++;
+            }
+
+            if (_subscribed.Count == 0)
+            {
+                Game.Core.GameLogger.LogError("GameOverController: All assigned tower references are null. Please assign valid TowerHealth components.");
+                return;
             }
 
             // Evaluate initial state in case some towers are already dead (e.g., in tests or specific setups)
@@ -109,7 +124,13 @@ namespace Game.Gameplay.GameOver
         {
             if (_gameOverShown) return;
             _gameOverShown = true;
-            if (_screenService == null) return;
+            IsGameOver = true;
+            GameOverShown?.Invoke();
+            if (_screenService == null)
+            {
+                Game.Core.GameLogger.LogError("GameOverController: IScreenService is not injected. Game Over screen cannot be shown. Ensure GameplayScope registers ScreenService and the controller is registered for injection.");
+                return;
+            }
             _screenService.Show(_gameOverScreenPrefabName);
         }
     }

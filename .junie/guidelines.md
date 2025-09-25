@@ -7,6 +7,7 @@ Audience: advanced Unity/.NET developers using Rider. Unity version pinned via R
 Project info located under .docs/gamedoc.md; If information in prompt conflicts with this document, use prompt information
 
 ALL SCRIPTS SHOULD BE INSIDE ASSETS/GAME/CODEBASE folder.
+DO NOT BUILD SOLUTION INSIDE RIDER
 Use assembly definitions for scripts to speed up compilation. At least core, gameplay and UI.
 
 ## 1. Build and Configuration
@@ -125,6 +126,8 @@ Scenes structure
 - Mismatched Unity versions can cause package resolution errors or compilation errors due to API surface changes.
 - If Rider does not discover tests, ensure Unity has generated project files after enabling Test Framework; then reopen in Rider.
 
+
+IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 
 ## 7. Architecture and codestyle
 - Follow C# conventions (PascalCase for types/methods, camelCase for locals/params). Private fields should start with prefix _

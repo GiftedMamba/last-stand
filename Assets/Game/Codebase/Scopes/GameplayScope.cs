@@ -3,6 +3,7 @@ using Game.UI.Screens;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using Game.Gameplay.GameOver;
 
 namespace Game.Scopes
 {
@@ -24,6 +25,9 @@ namespace Game.Scopes
                 // Register ScreenService with UIRoot
                 builder.RegisterInstance<IScreenService>(new ScreenService(_uiRoot.Root));
             }
+
+            // Ensure scene components with [Inject] receive dependencies
+            builder.RegisterComponentInHierarchy<GameOverController>();
         }
     }
 }
