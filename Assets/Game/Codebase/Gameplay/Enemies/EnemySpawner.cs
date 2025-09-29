@@ -161,6 +161,8 @@ namespace Game.Gameplay.Enemies
                 var handle = go.GetComponent<EnemyRegistryHandle>();
                 if (handle == null) handle = go.AddComponent<EnemyRegistryHandle>();
                 handle.Init(_enemyRegistry, enemy);
+                // Ensure registration even if OnEnable ran before Init assigned the registry
+                _enemyRegistry.Add(enemy);
             }
             return enemy;
         }

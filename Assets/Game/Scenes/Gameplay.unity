@@ -278,7 +278,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Player.PlayerSpawner
   _playerConfig: {fileID: 11400000, guid: ac37819d8742eaf47859637466abccb0, type: 2}
-  _enemyRegistry: {fileID: 0}
+  _enemyRegistry: {fileID: 594568889}
 --- !u!1 &594568887
 GameObject:
   m_ObjectHideFlags: 0

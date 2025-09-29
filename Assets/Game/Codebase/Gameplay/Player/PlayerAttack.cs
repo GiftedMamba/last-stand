@@ -24,43 +24,101 @@ namespace Game.Gameplay.Player
 
         private float _cooldown;
 
+        // Logging guards to avoid per-frame spam
+        private bool _warnedUninitialized;
+        private bool _loggedNoTarget;
+        private bool _loggedOutOfRange;
+
         public void Init(PlayerConfig config, EnemyRegistry registry)
         {
             _config = config;
             _enemyRegistry = registry;
+
+            var projectileSrc = _projectilePrefabOverride != null ? _projectilePrefabOverride.name : (_config != null && _config.ProjectilePrefab != null ? _config.ProjectilePrefab.name : "null");
+            int enemyCount = _enemyRegistry != null && _enemyRegistry.Enemies != null ? _enemyRegistry.Enemies.Count : -1;
+            GameLogger.Log($"PlayerAttack.Init: Initialized. config={(config != null)} atkSpeed={(_config != null ? _config.BaseAttackSpeed : 0f)} projectile='{projectileSrc}' registry={(registry != null)} enemies={enemyCount} firePoint={(_firePoint != null ? _firePoint.name : "null")}");
+
+            _warnedUninitialized = false;
         }
 
         private void Update()
         {
+            // Check initialization
             if (_config == null || _enemyRegistry == null)
+            {
+                if (!_warnedUninitialized)
+                {
+                    GameLogger.LogWarning($"PlayerAttack: Not initialized. Missing {( _config == null ? "PlayerConfig" : "" )}{( _config == null && _enemyRegistry == null ? " and " : "" )}{( _enemyRegistry == null ? "EnemyRegistry" : "" )}. Expected to be wired by PlayerSpawner.Init.");
+                    _warnedUninitialized = true;
+                }
                 return;
+            }
+            else if (_warnedUninitialized)
+            {
+                // Became initialized later
+                GameLogger.Log("PlayerAttack: Dependencies assigned at runtime. Resuming attack logic.");
+                _warnedUninitialized = false;
+            }
 
+            // Cooldown handling
             _cooldown -= Time.deltaTime;
             if (_cooldown > 0f)
+            {
                 return;
+            }
 
-            var closest = _enemyRegistry.FindClosest(_firePoint != null ? _firePoint.position : transform.position);
+            // Acquire target
+            var origin = _firePoint != null ? _firePoint.position : transform.position;
+            var closest = _enemyRegistry.FindClosest(origin);
             if (closest == null)
+            {
+                if (!_loggedNoTarget)
+                {
+                    int count = _enemyRegistry.Enemies != null ? _enemyRegistry.Enemies.Count : -1;
+                    GameLogger.Log("PlayerAttack: No target found. Enemy count=" + count + ". Waiting...");
+                    _loggedNoTarget = true;
+                }
                 return;
+            }
+            else if (_loggedNoTarget)
+            {
+                _loggedNoTarget = false;
+            }
 
             // Optional range check
             if (_maxTargetRange > 0f)
             {
-                float sqr = ((_firePoint != null ? _firePoint.position : transform.position) - closest.transform.position).sqrMagnitude;
-                if (sqr > _maxTargetRange * _maxTargetRange)
+                float sqr = (origin - closest.transform.position).sqrMagnitude;
+                float maxSqr = _maxTargetRange * _maxTargetRange;
+                if (sqr > maxSqr)
+                {
+                    if (!_loggedOutOfRange)
+                    {
+                        float dist = Mathf.Sqrt(sqr);
+                        GameLogger.Log($"PlayerAttack: Closest target '{closest.name}' is out of range. dist={dist:F2} > max={_maxTargetRange:F2}");
+                        _loggedOutOfRange = true;
+                    }
                     return;
+                }
+                else if (_loggedOutOfRange)
+                {
+                    _loggedOutOfRange = false;
+                }
             }
 
+            // Fire
             FireAt(closest);
             // Reset cooldown by attack speed (attacks per second)
             float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed);
             _cooldown = 1f / atkSpeed;
+            GameLogger.Log($"PlayerAttack: Attack fired. Next shot in {_cooldown:F2}s (atkSpeed={atkSpeed:F2} per sec)");
         }
 
         private void FireAt(Enemy target)
         {
             var spawnPos = _firePoint != null ? _firePoint.position : transform.position + Vector3.up * 0.5f;
-            var spawnRot = Quaternion.LookRotation((target.transform.position - spawnPos).normalized, Vector3.up);
+            var toTarget = (target.transform.position - spawnPos);
+            var spawnRot = Quaternion.LookRotation(toTarget.normalized, Vector3.up);
 
             var projectilePrefab = _projectilePrefabOverride != null ? _projectilePrefabOverride : _config.ProjectilePrefab;
             if (projectilePrefab == null)
@@ -68,6 +126,9 @@ namespace Game.Gameplay.Player
                 GameLogger.LogError("PlayerAttack: No projectile prefab assigned (override or in PlayerConfig).");
                 return;
             }
+
+            float dist = toTarget.magnitude;
+            GameLogger.Log($"PlayerAttack: Firing at '{target.name}' (dist={dist:F2}). Projectile='{projectilePrefab.name}'");
 
             var go = Instantiate(projectilePrefab, spawnPos, spawnRot);
             var proj = go.GetComponent<Projectile>();
@@ -78,7 +139,10 @@ namespace Game.Gameplay.Player
                 return;
             }
 
-            proj.Init(target, Mathf.Max(0f, _config.BaseProjectileSpeed), Mathf.Max(0f, _config.BaseDamage), _hitRadius);
+            float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
+            float dmg = Mathf.Max(0f, _config.BaseDamage);
+            proj.Init(target, speed, dmg, _hitRadius);
+            GameLogger.Log($"PlayerAttack: Projectile launched. speed={speed:F2} dmg={dmg:F1} hitRadius={_hitRadius:F2}");
         }
     }
 }

@@ -1062,7 +1062,7 @@ MonoBehaviour:
   _enemyRegistry: {fileID: 0}
   _firePoint: {fileID: 0}
   _projectilePrefabOverride: {fileID: 0}
-  _maxTargetRange: 50
+  _maxTargetRange: 0
   _hitRadius: 0.25
 --- !u!1 &7187380687623057673
 GameObject:
