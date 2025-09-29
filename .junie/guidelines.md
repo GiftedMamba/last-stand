@@ -146,6 +146,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - Store each feature in separate folder.
 - DO NOT use FindObjectOfType.
 - Use services which are injected via VContainer to share information between systems and features and components.
+- Use SerializableInterface<T> when you need to serialize interface reference in MonoBehaviour or ScriptableObject.
 
 ## 8. Layering & Ownership
 

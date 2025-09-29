@@ -1,13 +1,14 @@
 ﻿using Game.Configs;
 using Game.Core;
 using Game.Gameplay.Spots;
+using Game.Gameplay.Health;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace Game.Gameplay.Enemies
 {
     [RequireComponent(typeof(NavMeshAgent))]
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IHealth
     {
         [SerializeField] private EnemyConfig _config;
 
@@ -19,7 +20,12 @@ namespace Game.Gameplay.Enemies
 
         public EnemyConfig Config => _config;
         public int CurrentHp => _currentHp;
+        public int MaxHp => _config != null ? Mathf.Max(1, _config.MaxHp) : Mathf.Max(1, _currentHp);
+        public bool IsDead => _currentHp <= 0;
         public int Armor => _armor;
+
+        public event System.Action<int, int> OnDamaged;
+        public event System.Action OnDied;
 
         private void Awake()
         {
@@ -96,11 +102,15 @@ namespace Game.Gameplay.Enemies
 
         public void TakeDamage(float baseDamage, int armorPierce = 0)
         {
+            if (IsDead) return;
             // Armor reduction: 6% per armor, capped at 60%
             int effectiveArmor = Mathf.Max(0, _armor - Mathf.Max(0, armorPierce));
             float reduction = Mathf.Min(0.06f * effectiveArmor, 0.60f);
             int dmg = Mathf.CeilToInt(baseDamage * (1f - reduction));
+            int prev = _currentHp;
             _currentHp -= Mathf.Max(1, dmg); // at least 1 dmg
+            int dealt = Mathf.Max(0, prev - _currentHp);
+            OnDamaged?.Invoke(dealt, _currentHp);
 
             if (_currentHp <= 0)
                 Die();
@@ -108,6 +118,12 @@ namespace Game.Gameplay.Enemies
 
         public void Die()
         {
+            if (IsDead)
+            {
+                // Ensure HP is zero
+                _currentHp = 0;
+            }
+            OnDied?.Invoke();
             // TODO: notify systems via event/bus later
             Destroy(gameObject);
         }

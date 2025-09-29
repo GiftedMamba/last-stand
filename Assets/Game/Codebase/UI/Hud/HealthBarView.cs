@@ -1,19 +1,22 @@
-﻿using Game.Gameplay.Towers;
+﻿using Game.Gameplay.Health;
 using UnityEngine;
 using UnityEngine.UI;
+using TNRD;
 
 namespace Game.UI.Hud
 {
     /// <summary>
-    /// Binds a UI Image (filled) to a TowerHealth source. Assign this script to your health bar prefab
+    /// Binds a UI Image (filled) to any IHealth source (tower, enemy, etc.). Assign this script to your health bar prefab
     /// and hook up the Fill Image reference in the inspector. The image's fillAmount will decrease as HP goes down.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class HealthBarView : MonoBehaviour
     {
         [Header("Bindings")]
-        [SerializeField] private TowerHealth _health; // optional; will auto-find in parents if null
+        [SerializeField] private SerializableInterface<IHealth> _healthSource; // Serializable interface ref; can assign any component implementing IHealth
         [SerializeField] private Image _fillImage;    // Image.type should be Filled (Horizontal/Vertical/Radial)
+
+        private IHealth _health;
 
         [Header("Visuals")]
         [SerializeField] private Gradient _colorOverHealth; // optional; if set, color changes by percentage
@@ -28,12 +31,30 @@ namespace Game.UI.Hud
 
         private void Awake()
         {
-            if (_health == null)
-                _health = GetComponentInParent<TowerHealth>();
+            if (_healthSource == null || _healthSource.Value == null)
+            {
+                // Find any component in parents that implements IHealth and store it into the serializable wrapper
+                var candidates = GetComponentsInParent<MonoBehaviour>(true);
+                foreach (var mb in candidates)
+                {
+                    if (mb is IHealth h)
+                    {
+                        _healthSource = new SerializableInterface<IHealth>(h);
+                        break;
+                    }
+                }
+            }
+
+            _health = _healthSource != null ? _healthSource.Value : null;
         }
 
         private void OnEnable()
         {
+            if (_health == null && _healthSource != null)
+            {
+                _health = _healthSource.Value;
+            }
+
             if (_health != null)
             {
                 _health.OnDamaged += OnHealthChanged;
@@ -51,7 +72,7 @@ namespace Game.UI.Hud
             }
         }
 
-        public void Bind(TowerHealth health)
+        public void Bind(IHealth health)
         {
             if (_health == health) return;
 

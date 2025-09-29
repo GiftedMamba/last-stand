@@ -89,7 +89,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90173182088f43d89fa0bcf0ae1825c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Hud.HealthBarView
-  _health: {fileID: 7947473565960322741}
+  _healthSource:
+    mode: 0
+    unityReference: {fileID: 7947473565960322741}
+    rawReference:
+      rid: -2
   _fillImage: {fileID: 1577624869827418668}
   _colorOverHealth:
     serializedVersion: 2
@@ -122,6 +126,11 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   _minVisibleFill: 0.0001
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1 &5172038402505088617
 GameObject:
   m_ObjectHideFlags: 0

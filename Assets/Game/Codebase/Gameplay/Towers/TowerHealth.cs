@@ -1,6 +1,7 @@
 ﻿using System;
 using Game.Core;
 using UnityEngine;
+using Game.Gameplay.Health;
 
 namespace Game.Gameplay.Towers
 {
@@ -10,7 +11,7 @@ namespace Game.Gameplay.Towers
     /// will search on self or in parents for this component to apply damage.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class TowerHealth : MonoBehaviour
+    public sealed class TowerHealth : MonoBehaviour, IHealth
     {
         [SerializeField, Min(1)] private int _maxHp = 100;
         [SerializeField, Min(0)] private int _currentHp = 100;

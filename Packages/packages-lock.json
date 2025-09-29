@@ -218,6 +218,13 @@
       "dependencies": {},
       "hash": "0093a457d1abe17bbb97d9c0b7dea921c5e670e4"
     },
+    "net.tnrd.serializableinterface": {
+      "version": "2.2.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://package.openupm.com"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,

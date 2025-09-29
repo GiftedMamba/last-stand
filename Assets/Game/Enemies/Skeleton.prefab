@@ -101,7 +101,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4817296189668711846}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.07}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
@@ -266,7 +266,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90173182088f43d89fa0bcf0ae1825c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Hud.HealthBarView
-  _health: {fileID: 0}
+  _healthSource:
+    mode: 0
+    unityReference: {fileID: -8641947064268348029}
+    rawReference:
+      rid: -2
   _fillImage: {fileID: 1512498903174454936}
   _colorOverHealth:
     serializedVersion: 2
@@ -299,6 +303,11 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   _minVisibleFill: 0.0001
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!1001 &8961614872235163244
 PrefabInstance:
   m_ObjectHideFlags: 0
