@@ -20,6 +20,10 @@ namespace Game.Configs
         [SerializeField, Min(0)] private int _explodeDamageToTower = 10; // damage dealt to tower when enemy explodes on it
         [SerializeField] private bool _isBoss = false;
 
+        [Header("Hit/Aim")]
+        [Tooltip("Vertical offset for where projectiles should aim/hit (so arrows aim at body, not feet).")]
+        [SerializeField, Min(0f)] private float _aimPointYOffset = 1.0f;
+
         public GameObject EnemyPrefab => _enemyPrefab;
         public int MaxHp => _maxHp;
         public int Armor => _armor;
@@ -27,5 +31,6 @@ namespace Game.Configs
         public float DpsToSpot => _dpsToSpot;
         public int ExplodeDamageToTower => _explodeDamageToTower;
         public bool IsBoss => _isBoss;
+        public float AimPointYOffset => _aimPointYOffset;
     }
 }

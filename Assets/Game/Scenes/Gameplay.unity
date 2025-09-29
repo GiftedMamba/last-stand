@@ -391,6 +391,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15cabced02484040bc88f894ceb70f25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Towers.TowerHealth
+--- !u!1 &711211741
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 711211743}
+  - component: {fileID: 711211742}
+  m_Layer: 0
+  m_Name: EnemySpawntPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &711211742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 711211741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26d1cbf7ce2c40f2bcd7a16886dcc7bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Enemies.EnemySpawner
+  _enemyConfigs:
+  - {fileID: 11400000, guid: 8f8da936990d30547854408d12409ee4, type: 2}
+  _autoSpawnOnStart: 0
+  _autoConfigIndex: 0
+  _autoCount: 1
+  _spawnRadius: 0
+  _spawnRandomLoop: 1
+  _delaySeconds: 5
+  _enemyRegistry: {fileID: 594568889}
+--- !u!4 &711211743
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 711211741}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.01, y: 0, z: 27.33}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &842623917
 GameObject:
   m_ObjectHideFlags: 0
@@ -1068,6 +1121,59 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &1903687900
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1903687902}
+  - component: {fileID: 1903687901}
+  m_Layer: 0
+  m_Name: EnemySpawntPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: -5442936267250999957, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1903687901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903687900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26d1cbf7ce2c40f2bcd7a16886dcc7bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Enemies.EnemySpawner
+  _enemyConfigs:
+  - {fileID: 11400000, guid: 8f8da936990d30547854408d12409ee4, type: 2}
+  _autoSpawnOnStart: 0
+  _autoConfigIndex: 0
+  _autoCount: 1
+  _spawnRadius: 0
+  _spawnRandomLoop: 1
+  _delaySeconds: 5
+  _enemyRegistry: {fileID: 594568889}
+--- !u!4 &1903687902
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903687900}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.41, y: 0, z: 27.33}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2027939307
 GameObject:
   m_ObjectHideFlags: 0
@@ -1261,6 +1367,8 @@ SceneRoots:
   - {fileID: 660652024}
   - {fileID: 2027939311}
   - {fileID: 1763533582}
+  - {fileID: 1903687902}
+  - {fileID: 711211743}
   - {fileID: 277656202}
   - {fileID: 1019290415}
   - {fileID: 594568888}

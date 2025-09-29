@@ -36,7 +36,6 @@ namespace Game.Gameplay.Player
 
             var projectileSrc = _projectilePrefabOverride != null ? _projectilePrefabOverride.name : (_config != null && _config.ProjectilePrefab != null ? _config.ProjectilePrefab.name : "null");
             int enemyCount = _enemyRegistry != null && _enemyRegistry.Enemies != null ? _enemyRegistry.Enemies.Count : -1;
-            GameLogger.Log($"PlayerAttack.Init: Initialized. config={(config != null)} atkSpeed={(_config != null ? _config.BaseAttackSpeed : 0f)} projectile='{projectileSrc}' registry={(registry != null)} enemies={enemyCount} firePoint={(_firePoint != null ? _firePoint.name : "null")}");
 
             _warnedUninitialized = false;
         }
@@ -56,7 +55,6 @@ namespace Game.Gameplay.Player
             else if (_warnedUninitialized)
             {
                 // Became initialized later
-                GameLogger.Log("PlayerAttack: Dependencies assigned at runtime. Resuming attack logic.");
                 _warnedUninitialized = false;
             }
 
@@ -75,7 +73,6 @@ namespace Game.Gameplay.Player
                 if (!_loggedNoTarget)
                 {
                     int count = _enemyRegistry.Enemies != null ? _enemyRegistry.Enemies.Count : -1;
-                    GameLogger.Log("PlayerAttack: No target found. Enemy count=" + count + ". Waiting...");
                     _loggedNoTarget = true;
                 }
                 return;
@@ -95,7 +92,6 @@ namespace Game.Gameplay.Player
                     if (!_loggedOutOfRange)
                     {
                         float dist = Mathf.Sqrt(sqr);
-                        GameLogger.Log($"PlayerAttack: Closest target '{closest.name}' is out of range. dist={dist:F2} > max={_maxTargetRange:F2}");
                         _loggedOutOfRange = true;
                     }
                     return;
@@ -111,13 +107,21 @@ namespace Game.Gameplay.Player
             // Reset cooldown by attack speed (attacks per second)
             float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed);
             _cooldown = 1f / atkSpeed;
-            GameLogger.Log($"PlayerAttack: Attack fired. Next shot in {_cooldown:F2}s (atkSpeed={atkSpeed:F2} per sec)");
         }
 
         private void FireAt(Enemy target)
         {
             var spawnPos = _firePoint != null ? _firePoint.position : transform.position + Vector3.up * 0.5f;
-            var toTarget = (target.transform.position - spawnPos);
+
+            // Aim at enemy body using its config Y offset (defaults to 0 if not available)
+            float yOffset = 0f;
+            if (target != null && target.Config != null)
+            {
+                yOffset = Mathf.Max(0f, target.Config.AimPointYOffset);
+            }
+            Vector3 targetPoint = target.transform.position + new Vector3(0f, yOffset, 0f);
+
+            var toTarget = (targetPoint - spawnPos);
             var spawnRot = Quaternion.LookRotation(toTarget.normalized, Vector3.up);
 
             var projectilePrefab = _projectilePrefabOverride != null ? _projectilePrefabOverride : _config.ProjectilePrefab;
@@ -126,9 +130,6 @@ namespace Game.Gameplay.Player
                 GameLogger.LogError("PlayerAttack: No projectile prefab assigned (override or in PlayerConfig).");
                 return;
             }
-
-            float dist = toTarget.magnitude;
-            GameLogger.Log($"PlayerAttack: Firing at '{target.name}' (dist={dist:F2}). Projectile='{projectilePrefab.name}'");
 
             var go = Instantiate(projectilePrefab, spawnPos, spawnRot);
             var proj = go.GetComponent<Projectile>();
@@ -142,7 +143,6 @@ namespace Game.Gameplay.Player
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
             float dmg = Mathf.Max(0f, _config.BaseDamage);
             proj.Init(target, speed, dmg, _hitRadius);
-            GameLogger.Log($"PlayerAttack: Projectile launched. speed={speed:F2} dmg={dmg:F1} hitRadius={_hitRadius:F2}");
         }
     }
 }
