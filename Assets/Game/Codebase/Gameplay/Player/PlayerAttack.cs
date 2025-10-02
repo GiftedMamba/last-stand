@@ -16,6 +16,7 @@ namespace Game.Gameplay.Player
         [SerializeField] private PlayerConfig _config;
         [SerializeField] private EnemyRegistry _enemyRegistry;
         [SerializeField] private Transform _firePoint;
+        [SerializeField] private Animator _animator;
 
         [Header("Overrides (optional)")]
         [SerializeField] private GameObject _projectilePrefabOverride;
@@ -23,11 +24,43 @@ namespace Game.Gameplay.Player
         [SerializeField, Min(0.01f)] private float _hitRadius = 0.25f;
 
         private float _cooldown;
+        private Enemy _pendingTarget;
+        private static readonly int ShootHash = Animator.StringToHash("Shoot");
+        private const string ShootName = "Shoot"; // used for state crossfade fallback
+
+        // Animator setup cache
+        private bool _animSetupChecked;
+        private bool _hasShootTriggerParam;
 
         // Logging guards to avoid per-frame spam
         private bool _warnedUninitialized;
         private bool _loggedNoTarget;
         private bool _loggedOutOfRange;
+        private bool _loggedNoShootTriggerParam;
+
+        private void Awake()
+        {
+            // Auto-find animator if not wired to help scene setup
+            if (_animator == null)
+                _animator = GetComponentInChildren<Animator>();
+        }
+
+        private void EnsureAnimatorSetupChecked()
+        {
+            if (_animSetupChecked || _animator == null) return;
+            var parameters = _animator.parameters;
+            _hasShootTriggerParam = false;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var p = parameters[i];
+                if (p.type == AnimatorControllerParameterType.Trigger && p.name == ShootName)
+                {
+                    _hasShootTriggerParam = true;
+                    break;
+                }
+            }
+            _animSetupChecked = true;
+        }
 
         public void Init(PlayerConfig config, EnemyRegistry registry)
         {
@@ -102,11 +135,46 @@ namespace Game.Gameplay.Player
                 }
             }
 
-            // Fire
-            FireAt(closest);
-            // Reset cooldown by attack speed (attacks per second)
+            // Attack: trigger animation and defer actual firing to animation event
             float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed);
-            _cooldown = 1f / atkSpeed;
+            _cooldown = 1f / atkSpeed; // start cooldown immediately when we commit to an attack
+
+            if (_animator != null)
+            {
+                _pendingTarget = closest;
+                EnsureAnimatorSetupChecked();
+                if (_hasShootTriggerParam)
+                {
+                    _animator.SetTrigger(ShootHash); // Trigger parameter present
+                }
+                else
+                {
+                    if (!_loggedNoShootTriggerParam)
+                    {
+                        GameLogger.LogWarning("PlayerAttack: Animator has no Trigger parameter named 'Shoot'. Falling back to CrossFade to state 'Shoot'.");
+                        _loggedNoShootTriggerParam = true;
+                    }
+                    // CrossFade to a state named "Shoot" on base layer as a fallback
+                    _animator.CrossFade(ShootName, 0.025f, 0, 0f);
+                }
+            }
+            else
+            {
+                // Fallback if animator is not assigned: fire immediately
+                FireAt(closest);
+            }
+        }
+
+        // Animation Event handler. Add an animation event named "Shoot" in the attack animation to call this.
+        public void Shoot()
+        {
+            // Fire only if we have a pending target decided at trigger time; try reacquire as fallback
+            var target = _pendingTarget != null ? _pendingTarget : (_enemyRegistry != null ? _enemyRegistry.FindClosest(_firePoint != null ? _firePoint.position : transform.position) : null);
+            if (target != null)
+            {
+                FireAt(target);
+            }
+            _pendingTarget = null; // clear either way to avoid repeated shots
         }
 
         private void FireAt(Enemy target)
