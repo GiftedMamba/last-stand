@@ -54,6 +54,12 @@ namespace Game.Gameplay.Towers
                 _towerHealth.TakeDamage(dmg);
             }
 
+            // Spawn enemy-specific explosion prefab if assigned
+            if (cfg != null && cfg.ExplosionPrefab != null)
+            {
+                Instantiate(cfg.ExplosionPrefab, enemy.transform.position, Quaternion.identity);
+            }
+
             // Enemy explodes/dies after contacting tower
             enemy.Die();
         }

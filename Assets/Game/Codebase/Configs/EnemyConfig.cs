@@ -11,6 +11,8 @@ namespace Game.Configs
     {
         [Header("References")]
         [SerializeField] private GameObject _enemyPrefab;
+        [Tooltip("Prefab to spawn when this enemy explodes on a tower (e.g., VFX/SFX container). Optional.")]
+        [SerializeField] private GameObject _explosionPrefab;
 
         [Header("Stats (from GDD)")]
         [SerializeField, Min(1)] private int _maxHp = 100;
@@ -25,6 +27,7 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _aimPointYOffset = 1.0f;
 
         public GameObject EnemyPrefab => _enemyPrefab;
+        public GameObject ExplosionPrefab => _explosionPrefab;
         public int MaxHp => _maxHp;
         public int Armor => _armor;
         public float MoveSpeed => _moveSpeed;

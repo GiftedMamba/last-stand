@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 8115316031295193917, guid: 9f38db09a80a31b46bef8551cf95809b, type: 3}
+  _explosionPrefab: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   _maxHp: 100
   _armor: 0
   _moveSpeed: 1.7
   _dpsToSpot: 8
+  _explodeDamageToTower: 10
   _isBoss: 0
+  _aimPointYOffset: 1
