@@ -147,6 +147,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - DO NOT use FindObjectOfType.
 - Use services which are injected via VContainer to share information between systems and features and components.
 - Use SerializableInterface<T> when you need to serialize interface reference in MonoBehaviour or ScriptableObject.
+- Ensure all triggres and animator parameters are stored in centralized place and hashed
 
 ## 8. Layering & Ownership
 

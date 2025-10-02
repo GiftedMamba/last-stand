@@ -18,6 +18,11 @@ namespace Game.Gameplay.Enemies
         private TowerTarget _currentTarget;
         private float _retargetTimer;
 
+        [Header("Presentation")]
+        [SerializeField] private Animator _animator;
+
+        private bool _isDying;
+
         public EnemyConfig Config => _config;
         public int CurrentHp => _currentHp;
         public int MaxHp => _config != null ? Mathf.Max(1, _config.MaxHp) : Mathf.Max(1, _currentHp);
@@ -30,6 +35,8 @@ namespace Game.Gameplay.Enemies
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
+            if (_animator == null)
+                TryGetComponent(out _animator);
         }
 
         private void Start()
@@ -121,14 +128,42 @@ namespace Game.Gameplay.Enemies
 
         public void Die()
         {
-            if (IsDead)
-            {
-                // Ensure HP is zero
-                _currentHp = 0;
-            }
+            if (_isDying)
+                return;
+
+            // Mark as dead/dying and clamp HP to zero
+            _isDying = true;
+            _currentHp = 0;
+
+            // Notify listeners once
             OnDied?.Invoke();
-            // TODO: notify systems via event/bus later
-            Destroy(gameObject);
+
+            // Stop navigation/movement
+            if (_agent != null)
+            {
+                if (_agent.isOnNavMesh)
+                {
+                    _agent.isStopped = true;
+                    _agent.ResetPath();
+                }
+                _agent.updatePosition = false;
+                _agent.updateRotation = false;
+            }
+
+            // Prevent further hits/physics interactions during the end animation
+            if (TryGetComponent<Collider>(out var col))
+            {
+                col.enabled = false;
+            }
+
+            // Play end animation if Animator is present
+            if (_animator != null)
+            {
+                _animator.SetTrigger("Dead");
+            }
+
+            // Delay destruction to allow animation to finish
+            Destroy(gameObject, 3f);
         }
 
 #if UNITY_EDITOR

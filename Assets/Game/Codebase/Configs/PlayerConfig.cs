@@ -18,11 +18,13 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _baseDamage = 10f;
         [SerializeField, Min(0f)] private float _baseAttackSpeed = 1f; // attacks per second
         [SerializeField, Min(0f)] private float _baseProjectileSpeed = 10f; // units per second
+        [SerializeField, Min(0)] private int _basePierceCount = 0; // how many enemies projectile can pierce through
 
         public GameObject PlayerPrefab => _playerPrefab;
         public GameObject ProjectilePrefab => _projectilePrefab;
         public float BaseDamage => _baseDamage;
         public float BaseAttackSpeed => _baseAttackSpeed;
         public float BaseProjectileSpeed => _baseProjectileSpeed;
+        public int BasePierceCount => _basePierceCount;
     }
 }

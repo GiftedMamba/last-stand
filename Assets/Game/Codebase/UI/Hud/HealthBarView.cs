@@ -100,7 +100,8 @@ namespace Game.UI.Hud
 
         private void OnDied()
         {
-            Sync();
+            // Hide health UI immediately on death
+            gameObject.SetActive(false);
         }
 
         private void Sync()

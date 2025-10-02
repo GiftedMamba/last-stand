@@ -17,3 +17,4 @@ MonoBehaviour:
   _baseDamage: 50
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 30
+  _basePierceCount: 2

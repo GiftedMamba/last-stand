@@ -1,6 +1,7 @@
 ﻿using Game.Core;
 using Game.Gameplay.Enemies;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Game.Gameplay.Combat
 {
@@ -19,13 +20,17 @@ namespace Game.Gameplay.Combat
         private Vector3 _targetPosition;
         private bool _hasSnapshot;
         private float _life;
+        private int _pierceCount; // how many enemies this projectile can pierce through
+        private HashSet<Enemy> _hitEnemies; // tracks which enemies have been hit to avoid multiple hits
 
-        public void Init(Enemy target, float speed, float damage, float hitRadius = 0.2f)
+        public void Init(Enemy target, float speed, float damage, float hitRadius = 0.2f, int pierceCount = 0)
         {
             _target = target;
             _speed = Mathf.Max(0f, speed);
             _damage = Mathf.Max(0f, damage);
             _hitRadius = Mathf.Max(0.01f, hitRadius);
+            _pierceCount = Mathf.Max(0, pierceCount);
+            _hitEnemies = new HashSet<Enemy>();
 
             if (_target != null)
             {
@@ -108,6 +113,8 @@ namespace Game.Gameplay.Combat
         {
             // Check for any enemy colliders within hit radius
             var hits = Physics.OverlapSphere(transform.position, _hitRadius, ~0, QueryTriggerInteraction.Collide);
+            bool hitAnyNewEnemy = false;
+            
             for (int i = 0; i < hits.Length; i++)
             {
                 var col = hits[i];
@@ -115,9 +122,23 @@ namespace Game.Gameplay.Combat
                 var enemy = col.GetComponentInParent<Enemy>();
                 if (enemy == null) continue;
                 if (enemy.IsDead) continue;
+                
+                // Skip if we've already hit this enemy
+                if (_hitEnemies.Contains(enemy)) continue;
+                
+                // Hit the enemy and track it
                 enemy.TakeDamage(_damage);
-                return true;
+                _hitEnemies.Add(enemy);
+                hitAnyNewEnemy = true;
+                
+                // If we've hit the maximum number of enemies (pierce count + 1), destroy projectile
+                if (_hitEnemies.Count >= _pierceCount + 1)
+                {
+                    return true;
+                }
             }
+            
+            // Only destroy if we hit new enemies and exceeded pierce count
             return false;
         }
 

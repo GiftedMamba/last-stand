@@ -91,9 +91,9 @@ namespace Game.Gameplay.Player
                 _warnedUninitialized = false;
             }
 
-            // Cooldown handling
+            // Cooldown handling - but allow immediate retargeting if pending target dies
             _cooldown -= Time.deltaTime;
-            if (_cooldown > 0f)
+            if (_cooldown > 0f && (_pendingTarget == null || !_pendingTarget.IsDead))
             {
                 return;
             }
@@ -101,7 +101,7 @@ namespace Game.Gameplay.Player
             // Acquire target
             var origin = _firePoint != null ? _firePoint.position : transform.position;
             var closest = _enemyRegistry.FindClosest(origin);
-            if (closest == null)
+            if (closest == null || closest.IsDead)
             {
                 if (!_loggedNoTarget)
                 {
@@ -170,7 +170,7 @@ namespace Game.Gameplay.Player
         {
             // Fire only if we have a pending target decided at trigger time; try reacquire as fallback
             var target = _pendingTarget != null ? _pendingTarget : (_enemyRegistry != null ? _enemyRegistry.FindClosest(_firePoint != null ? _firePoint.position : transform.position) : null);
-            if (target != null)
+            if (target != null && !target.IsDead)
             {
                 FireAt(target);
             }
@@ -210,7 +210,8 @@ namespace Game.Gameplay.Player
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
             float dmg = Mathf.Max(0f, _config.BaseDamage);
-            proj.Init(target, speed, dmg, _hitRadius);
+            int pierceCount = Mathf.Max(0, _config.BasePierceCount);
+            proj.Init(target, speed, dmg, _hitRadius, pierceCount);
         }
     }
 }
