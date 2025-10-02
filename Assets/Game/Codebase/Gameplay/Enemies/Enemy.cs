@@ -13,7 +13,7 @@ namespace Game.Gameplay.Enemies
         [SerializeField] private EnemyConfig _config;
 
         private NavMeshAgent _agent;
-        private int _currentHp;
+        [SerializeField] private int _currentHp;
         private int _armor;
         private TowerTarget _currentTarget;
         private float _retargetTimer;
@@ -78,6 +78,9 @@ namespace Game.Gameplay.Enemies
                 _agent.stoppingDistance = 0.25f;
                 _agent.autoBraking = true;
             }
+
+            // Notify listeners so UI can sync initial health right after spawn
+            OnDamaged?.Invoke(0, _currentHp);
         }
 
         private void AcquireAndMoveToTarget()

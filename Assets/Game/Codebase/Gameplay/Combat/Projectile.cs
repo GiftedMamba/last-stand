@@ -57,6 +57,12 @@ namespace Game.Gameplay.Combat
             {
                 // No target snapshot: move forward and expire naturally
                 transform.position += transform.forward * (_speed * Time.deltaTime);
+                // After moving, try to hit any enemy within radius
+                if (TryHitAny())
+                {
+                    Destroy(gameObject);
+                    return;
+                }
                 // keep current rotation
                 return;
             }
@@ -65,7 +71,13 @@ namespace Game.Gameplay.Combat
             float dist = toTarget.magnitude;
             if (dist <= _hitRadius)
             {
-                // Reached destination. Deal damage only if intended target is still within hit radius.
+                // Reached destination. First, try to hit any enemy in range
+                if (TryHitAny())
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+                // Fallback to original behavior: apply to intended target if still within radius
                 if (_target != null)
                 {
                     float currentDistToEnemy = Vector3.Distance(_target.transform.position, transform.position);
@@ -83,7 +95,30 @@ namespace Game.Gameplay.Combat
                 Vector3 dir = toTarget / dist;
                 transform.position += dir * (_speed * Time.deltaTime);
                 transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+                // After moving, try to hit any enemy within radius
+                if (TryHitAny())
+                {
+                    Destroy(gameObject);
+                    return;
+                }
             }
+        }
+
+        private bool TryHitAny()
+        {
+            // Check for any enemy colliders within hit radius
+            var hits = Physics.OverlapSphere(transform.position, _hitRadius, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                var col = hits[i];
+                if (col == null) continue;
+                var enemy = col.GetComponentInParent<Enemy>();
+                if (enemy == null) continue;
+                if (enemy.IsDead) continue;
+                enemy.TakeDamage(_damage);
+                return true;
+            }
+            return false;
         }
 
 #if UNITY_EDITOR
