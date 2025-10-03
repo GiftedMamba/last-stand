@@ -82,16 +82,8 @@ namespace Game.Gameplay.Combat
                     Destroy(gameObject);
                     return;
                 }
-                // Fallback to original behavior: apply to intended target if still within radius
-                if (_target != null)
-                {
-                    float currentDistToEnemy = Vector3.Distance(_target.transform.position, transform.position);
-                    if (currentDistToEnemy <= _hitRadius)
-                    {
-                        _target.TakeDamage(_damage);
-                    }
-                }
-                Destroy(gameObject);
+                // Reached snapshot point: continue flying forward to allow piercing further enemies
+                _hasSnapshot = false;
                 return;
             }
 
@@ -131,8 +123,8 @@ namespace Game.Gameplay.Combat
                 _hitEnemies.Add(enemy);
                 hitAnyNewEnemy = true;
                 
-                // If we've hit the maximum number of enemies (pierce count + 1), destroy projectile
-                if (_hitEnemies.Count >= _pierceCount + 1)
+                // If we've hit the maximum number of enemies allowed by pierce count, destroy projectile
+                if (_hitEnemies.Count >= _pierceCount)
                 {
                     return true;
                 }

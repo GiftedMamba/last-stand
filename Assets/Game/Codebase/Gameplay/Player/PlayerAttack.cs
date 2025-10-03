@@ -168,12 +168,19 @@ namespace Game.Gameplay.Player
         // Animation Event handler. Add an animation event named "Shoot" in the attack animation to call this.
         public void Shoot()
         {
-            // Fire only if we have a pending target decided at trigger time; try reacquire as fallback
-            var target = _pendingTarget != null ? _pendingTarget : (_enemyRegistry != null ? _enemyRegistry.FindClosest(_firePoint != null ? _firePoint.position : transform.position) : null);
+            // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire a new closest target.
+            var origin = _firePoint != null ? _firePoint.position : transform.position;
+            var target = _pendingTarget;
+            if (target == null || target.IsDead)
+            {
+                target = _enemyRegistry != null ? _enemyRegistry.FindClosest(origin) : null;
+            }
+
             if (target != null && !target.IsDead)
             {
                 FireAt(target);
             }
+
             _pendingTarget = null; // clear either way to avoid repeated shots
         }
 
