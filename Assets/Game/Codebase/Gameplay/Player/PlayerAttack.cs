@@ -197,7 +197,7 @@ namespace Game.Gameplay.Player
             Vector3 targetPoint = target.transform.position + new Vector3(0f, yOffset, 0f);
 
             var toTarget = (targetPoint - spawnPos);
-            var spawnRot = Quaternion.LookRotation(toTarget.normalized, Vector3.up);
+            var baseRot = Quaternion.LookRotation(toTarget.normalized, Vector3.up);
 
             var projectilePrefab = _projectilePrefabOverride != null ? _projectilePrefabOverride : _config.ProjectilePrefab;
             if (projectilePrefab == null)
@@ -206,19 +206,31 @@ namespace Game.Gameplay.Player
                 return;
             }
 
-            var go = Instantiate(projectilePrefab, spawnPos, spawnRot);
-            var proj = go.GetComponent<Projectile>();
-            if (proj == null)
-            {
-                GameLogger.LogError("PlayerAttack: Projectile prefab missing Projectile component.");
-                Destroy(go);
-                return;
-            }
+            // Determine spread based on config.AttackCount (1..5)
+            int count = Mathf.Clamp(_config.AttackCount, 1, 5);
+            int[] angleOrder = { 0, -20, 20, -40, 40 };
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
             float dmg = Mathf.Max(0f, _config.BaseDamage);
             int pierceCount = Mathf.Max(0, _config.BasePierceCount);
-            proj.Init(target, speed, dmg, _hitRadius, pierceCount);
+
+            for (int i = 0; i < count && i < angleOrder.Length; i++)
+            {
+                int angle = angleOrder[i];
+                var rot = Quaternion.AngleAxis(angle, Vector3.up) * baseRot;
+                var go = Instantiate(projectilePrefab, spawnPos, rot);
+                var proj = go.GetComponent<Projectile>();
+                if (proj == null)
+                {
+                    GameLogger.LogError("PlayerAttack: Projectile prefab missing Projectile component.");
+                    Destroy(go);
+                    continue;
+                }
+
+                // For the central shot (0 deg), use the target snapshot; for side shots, fire forward without target snapshot
+                Enemy initTarget = angle == 0 ? target : null;
+                proj.Init(initTarget, speed, dmg, _hitRadius, pierceCount);
+            }
         }
     }
 }

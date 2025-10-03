@@ -74,30 +74,49 @@ namespace Game.Gameplay.Combat
 
             Vector3 toTarget = _targetPosition - transform.position;
             float dist = toTarget.magnitude;
-            if (dist <= _hitRadius)
-            {
-                // Reached destination. First, try to hit any enemy in range
-                if (TryHitAny())
-                {
-                    Destroy(gameObject);
-                    return;
-                }
-                // Reached snapshot point: continue flying forward to allow piercing further enemies
-                _hasSnapshot = false;
-                return;
-            }
 
+            // Move towards snapshot without overshooting. When reaching it, switch to forward flight without turning back.
             if (dist > 0.001f)
             {
-                Vector3 dir = toTarget / dist;
-                transform.position += dir * (_speed * Time.deltaTime);
-                transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-                // After moving, try to hit any enemy within radius
+                float step = _speed * Time.deltaTime;
+
+                if (step >= dist)
+                {
+                    // Snap to target position this frame and process hit without flipping direction back
+                    Vector3 dir = dist > 0.0001f ? toTarget / dist : transform.forward;
+                    transform.position = _targetPosition;
+                    // Do not rotate towards the snapshot again; keep current forward to continue past the target
+                    if (TryHitAny())
+                    {
+                        Destroy(gameObject);
+                        return;
+                    }
+                    _hasSnapshot = false;
+                    return;
+                }
+                else
+                {
+                    Vector3 dir = toTarget / dist;
+                    transform.position += dir * step;
+                    transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+                    // After moving, try to hit any enemy within radius
+                    if (TryHitAny())
+                    {
+                        Destroy(gameObject);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                // Already at snapshot
                 if (TryHitAny())
                 {
                     Destroy(gameObject);
                     return;
                 }
+                _hasSnapshot = false;
+                return;
             }
         }
 
