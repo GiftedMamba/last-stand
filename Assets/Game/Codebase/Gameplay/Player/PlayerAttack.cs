@@ -91,9 +91,9 @@ namespace Game.Gameplay.Player
                 _warnedUninitialized = false;
             }
 
-            // Cooldown handling - but allow immediate retargeting if pending target dies
+            // Cooldown handling - attack continuously by cooldown regardless of target death
             _cooldown -= Time.deltaTime;
-            if (_cooldown > 0f && (_pendingTarget == null || !_pendingTarget.IsDead))
+            if (_cooldown > 0f)
             {
                 return;
             }

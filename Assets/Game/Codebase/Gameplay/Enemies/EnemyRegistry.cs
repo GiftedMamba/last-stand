@@ -31,6 +31,8 @@ namespace Game.Gameplay.Enemies
 
         /// <summary>
         /// Finds the closest enemy to the given position. Returns null if none.
+        /// Skips enemies that are null or dead to avoid targeting corpses during death animations.
+        /// Also prunes null or dead entries from the registry as we encounter them.
         /// </summary>
         public Enemy FindClosest(Vector3 position)
         {
@@ -39,7 +41,7 @@ namespace Game.Gameplay.Enemies
             for (int i = _enemies.Count - 1; i >= 0; i--)
             {
                 var e = _enemies[i];
-                if (e == null)
+                if (e == null || e.IsDead)
                 {
                     _enemies.RemoveAt(i);
                     continue;
