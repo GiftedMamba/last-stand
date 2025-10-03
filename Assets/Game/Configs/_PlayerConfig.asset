@@ -18,4 +18,4 @@ MonoBehaviour:
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 30
   _basePierceCount: 2
-  _attackCount: 3
+  _attackCount: 5

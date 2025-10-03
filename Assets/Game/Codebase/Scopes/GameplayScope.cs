@@ -4,6 +4,8 @@ using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 using Game.Gameplay.GameOver;
+using Game.Configs;
+using Game.Gameplay.Abilities;
 
 namespace Game.Scopes
 {
@@ -11,6 +13,7 @@ namespace Game.Scopes
     {
         [Header("Scene References")]
         [SerializeField] private UIRoot _uiRoot;
+        [SerializeField] private GlobalAbilityCatalog _globalAbilityCatalog;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -26,8 +29,22 @@ namespace Game.Scopes
                 builder.RegisterInstance<IScreenService>(new ScreenService(_uiRoot.Root));
             }
 
+            // Global Abilities wiring
+            if (_globalAbilityCatalog == null)
+            {
+                Game.Core.GameLogger.LogError("GameplayScope: GlobalAbilityCatalog is not assigned. Global abilities will still log but without config data.");
+            }
+            else
+            {
+                // Make catalog available for constructor injection
+                builder.RegisterInstance(_globalAbilityCatalog);
+            }
+            // Register ability service as a global singleton
+            builder.Register<IGlobalAbilityService, GlobalAbilityService>(Lifetime.Singleton);
+
             // Ensure scene components with [Inject] receive dependencies
             builder.RegisterComponentInHierarchy<GameOverController>();
+            builder.RegisterComponentInHierarchy<Game.UI.GlobalAbilityButton>();
         }
     }
 }
