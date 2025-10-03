@@ -148,6 +148,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - Use services which are injected via VContainer to share information between systems and features and components.
 - Use SerializableInterface<T> when you need to serialize interface reference in MonoBehaviour or ScriptableObject.
 - Ensure all triggres and animator parameters are stored in centralized place and hashed
+- Schedule timers or cooldowns for things like abilities or any other gameplay logic in dedicated services, do not use cooldowns inside UI layer for gameplay logic!
 
 ## 8. Layering & Ownership
 
