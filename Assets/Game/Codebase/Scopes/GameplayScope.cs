@@ -39,6 +39,9 @@ namespace Game.Scopes
                 // Make catalog available for constructor injection
                 builder.RegisterInstance(_globalAbilityCatalog);
             }
+            
+            // Register executor from scene hierarchy (needs EnemyRegistry reference)
+            builder.RegisterComponentInHierarchy<GlobalAbilityExecutor>().As<IGlobalAbilityExecutor>();
             // Register ability service as a global singleton
             builder.Register<IGlobalAbilityService, GlobalAbilityService>(Lifetime.Singleton);
 

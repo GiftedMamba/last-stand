@@ -6,10 +6,12 @@ namespace Game.Gameplay.Abilities
     public class GlobalAbilityService : IGlobalAbilityService
     {
         private readonly GlobalAbilityCatalog _catalog;
+        private readonly IGlobalAbilityExecutor _executor;
 
-        public GlobalAbilityService(GlobalAbilityCatalog catalog)
+        public GlobalAbilityService(GlobalAbilityCatalog catalog, IGlobalAbilityExecutor executor)
         {
             _catalog = catalog;
+            _executor = executor;
         }
 
         public void Trigger(GlobalAbility ability)
@@ -22,6 +24,21 @@ namespace Game.Gameplay.Abilities
             }
 
             GameLogger.Log($"[GlobalAbilityService] Triggered {ability} | Cooldown={config.Cooldown}s, Duration={config.Duration}s");
+
+            switch (ability)
+            {
+                case GlobalAbility.Stun:
+                    if (_executor == null)
+                    {
+                        GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Stun effect.");
+                        return;
+                    }
+                    _executor.StunForSeconds(config.Duration);
+                    break;
+                default:
+                    // Other abilities to be implemented later
+                    break;
+            }
         }
     }
 }

@@ -149,6 +149,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - Use SerializableInterface<T> when you need to serialize interface reference in MonoBehaviour or ScriptableObject.
 - Ensure all triggres and animator parameters are stored in centralized place and hashed
 - Schedule timers or cooldowns for things like abilities or any other gameplay logic in dedicated services, do not use cooldowns inside UI layer for gameplay logic!
+- If you register in scopes services, which inherited from Monobehavior, use [SerializedFied] and register them in Container, not from hierarchy.
 
 ## 8. Layering & Ownership
 
