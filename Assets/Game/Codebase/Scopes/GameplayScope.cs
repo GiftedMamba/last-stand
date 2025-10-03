@@ -6,6 +6,7 @@ using VContainer.Unity;
 using Game.Gameplay.GameOver;
 using Game.Configs;
 using Game.Gameplay.Abilities;
+using Game.Presentation.Camera;
 
 namespace Game.Scopes
 {
@@ -44,6 +45,9 @@ namespace Game.Scopes
             builder.RegisterComponentInHierarchy<GlobalAbilityExecutor>().As<IGlobalAbilityExecutor>();
             // Register ability service as a global singleton
             builder.Register<IGlobalAbilityService, GlobalAbilityService>(Lifetime.Singleton);
+
+            // Register CameraShake from hierarchy so it can be injected where needed
+            builder.RegisterComponentInHierarchy<CameraShake>();
 
             // Ensure scene components with [Inject] receive dependencies
             builder.RegisterComponentInHierarchy<GameOverController>();

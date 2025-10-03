@@ -399,6 +399,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 5924776276256426206}
   m_SourcePrefab: {fileID: 100100000, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
+--- !u!95 &3257396205250905085 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
+  m_PrefabInstance: {fileID: 8961614872235163244}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8115316031295193917 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: c0e8ec4be6a4d554881a5c8bb6d0c0cf, type: 3}
@@ -440,6 +445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Enemies.Enemy
   _config: {fileID: 11400000, guid: 8f8da936990d30547854408d12409ee4, type: 2}
   _currentHp: 0
+  _animator: {fileID: 3257396205250905085}
 --- !u!136 &1647370070833013469
 CapsuleCollider:
   m_ObjectHideFlags: 0
