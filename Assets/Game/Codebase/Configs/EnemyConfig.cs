@@ -22,6 +22,10 @@ namespace Game.Configs
         [SerializeField, Min(0)] private int _explodeDamageToTower = 10; // damage dealt to tower when enemy explodes on it
         [SerializeField] private bool _isBoss = false;
 
+        [Header("Rewards")]
+        [Tooltip("XP granted to the player when this enemy dies.")]
+        [SerializeField, Min(0)] private int _xpReward = 1;
+
         [Header("Hit/Aim")]
         [Tooltip("Vertical offset for where projectiles should aim/hit (so arrows aim at body, not feet).")]
         [SerializeField, Min(0f)] private float _aimPointYOffset = 1.0f;
@@ -34,6 +38,7 @@ namespace Game.Configs
         public float DpsToSpot => _dpsToSpot;
         public int ExplodeDamageToTower => _explodeDamageToTower;
         public bool IsBoss => _isBoss;
+        public int XpReward => _xpReward;
         public float AimPointYOffset => _aimPointYOffset;
     }
 }

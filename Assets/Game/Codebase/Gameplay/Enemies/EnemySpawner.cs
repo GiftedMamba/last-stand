@@ -4,6 +4,8 @@ using Game.Configs;
 using Game.Core;
 using Game.Gameplay.GameOver;
 using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Enemies
 {
@@ -34,6 +36,14 @@ namespace Game.Gameplay.Enemies
         private bool _stopped;
         private float _desyncOffset; // computed once per spawner
 
+        private IObjectResolver _resolver;
+
+        [Inject]
+        public void Construct(IObjectResolver resolver)
+        {
+            _resolver = resolver;
+        }
+
         private void OnEnable()
         {
             GameOverController.GameOverShown += HandleGameOver;
@@ -41,6 +51,14 @@ namespace Game.Gameplay.Enemies
         
         private void Start()
         {
+            // Fallback: if DI didn't run, try to grab a resolver from nearest LifetimeScope
+            if (_resolver == null)
+            {
+                var scope = GetComponentInParent<VContainer.Unity.LifetimeScope>();
+                if (scope != null)
+                    _resolver = scope.Container;
+            }
+
             if (GameOverController.IsGameOver)
             {
                 _stopped = true;
@@ -172,7 +190,9 @@ namespace Game.Gameplay.Enemies
                 return null;
             }
 
-            var go = Instantiate(config.EnemyPrefab, position, rotation);
+            var go = _resolver != null
+                ? _resolver.Instantiate(config.EnemyPrefab, position, rotation)
+                : Instantiate(config.EnemyPrefab, position, rotation);
             go.name = config.EnemyPrefab.name;
 
             var enemy = go.GetComponent<Enemy>();
@@ -184,6 +204,18 @@ namespace Game.Gameplay.Enemies
             }
 
             enemy.InitializeFromConfig(config);
+
+            // Ensure XP awarder is present
+            var xpAwarder = go.GetComponent<EnemyXpAwarder>();
+            if (xpAwarder == null)
+            {
+                xpAwarder = go.AddComponent<EnemyXpAwarder>();
+                if (_resolver != null)
+                {
+                    // Ensure DI on the newly added component
+                    _resolver.Inject(xpAwarder);
+                }
+            }
 
             // Register with EnemyRegistry if assigned
             if (_enemyRegistry != null)

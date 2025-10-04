@@ -20,4 +20,5 @@ MonoBehaviour:
   _dpsToSpot: 8
   _explodeDamageToTower: 10
   _isBoss: 0
+  _xpReward: 25
   _aimPointYOffset: 1

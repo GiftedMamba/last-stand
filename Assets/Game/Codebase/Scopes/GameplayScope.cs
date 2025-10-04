@@ -7,6 +7,7 @@ using Game.Gameplay.GameOver;
 using Game.Configs;
 using Game.Gameplay.Abilities;
 using Game.Presentation.Camera;
+using Game.Gameplay.Enemies;
 
 namespace Game.Scopes
 {
@@ -52,6 +53,9 @@ namespace Game.Scopes
             // Ensure scene components with [Inject] receive dependencies
             builder.RegisterComponentInHierarchy<GameOverController>();
             builder.RegisterComponentInHierarchy<Game.UI.GlobalAbilityButton>();
+
+            // Allow EnemySpawner to receive IObjectResolver for DI instantiation of enemies
+            builder.RegisterComponentInHierarchy<EnemySpawner>();
         }
     }
 }

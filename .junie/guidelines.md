@@ -152,6 +152,9 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - If you register in scopes services, which inherited from Monobehavior, use [SerializedFied] and register them in Container, not from hierarchy.
 - Enums should be numbered from 0, always use Unknown = 0 as a first value.
 - Do not use velocity of Rigidbody, it is obsolte. Use linearVlocity instead
+- If you need to control timescale, use dedicated service for it
+- Use Dotween for UI animations
+- Use IObjectResolver.Instantiate for creating new objects, not Instantiate to have all dependencies injected.
 
 ## 8. Layering & Ownership
 
