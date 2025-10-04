@@ -22,11 +22,13 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _duration = 5f;
 
         [Header("Payload")]
-        [Tooltip("Generic damage value used by abilities. For Howl: percentage more damage taken when IsPercent is true. For Stun: damage dealt once on activation.")]
+        [Tooltip("Generic damage value used by abilities. For Howl: percentage more damage taken when IsPercent is true. For Stun: damage dealt once on activation. For Cannon: impact damage per target inside splash.")]
         [FormerlySerializedAs("_damagePercent")]
         [SerializeField, Min(0f)] private float _damage = 0f;
-        [Tooltip("Interpret Damage as percent (true) or as a flat value (false). For Howl, percent is expected.")]
+        [Tooltip("Interpret Damage as percent (true) or as a flat value (false). For Howl, percent is expected; for Cannon, percent means percent of Max HP.")]
         [SerializeField] private bool _isPercent = true;
+        [Tooltip("Splash radius (world units) for area-of-effect abilities like Cannon.")]
+        [SerializeField, Min(0f)] private float _splash = 0f;
 
         [Header("VFX")]
         [Tooltip("Optional VFX prefab to spawn on each affected target when the ability is applied. If null, no VFX will be spawned.")]
@@ -37,6 +39,7 @@ namespace Game.Configs
         public float Duration => _duration;
         public float Damage => _damage;
         public bool IsPercent => _isPercent;
+        public float Splash => _splash;
         public GameObject VfxPrefab => _vfxPrefab;
     }
 }

@@ -374,5 +374,76 @@ namespace Game.Gameplay.Abilities
             _howlRoutine = null;
             _howlUntil = 0f;
         }
+
+        public void ApplyCannon(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
+        {
+            // Select target position: average of alive enemies, fallback to world origin
+            Vector3 targetPos = Vector3.zero;
+            int count = 0;
+            if (_enemyRegistry != null && _enemyRegistry.Enemies != null)
+            {
+                var list = _enemyRegistry.Enemies;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var e = list[i];
+                    if (e == null || e.IsDead) continue;
+                    targetPos += e.transform.position;
+                    count++;
+                }
+            }
+            if (count > 0)
+                targetPos /= count;
+            else
+                targetPos = Vector3.zero;
+
+            // Raise target slightly to avoid ground clipping
+            float groundY = targetPos.y;
+
+            // Define a simple launch offset to create an arc coming from the side and above
+            Vector3 startPos = targetPos + new Vector3(-6f, 8f, -6f);
+
+            // Spawn projectile GameObject and initialize arc
+            var go = new GameObject("CannonProjectile");
+            var proj = go.AddComponent<CannonProjectile>();
+            // Parent to this executor for hierarchy tidiness
+            go.transform.SetParent(transform);
+            float arcHeight = 6f;
+            float flightTime = 1.25f;
+            proj.Init(startPos, new Vector3(targetPos.x, groundY, targetPos.z), arcHeight, flightTime, impactPos =>
+            {
+                // Camera feedback
+                _cameraShake?.StartShake();
+                // Apply AoE damage
+                ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
+                // Spawn impact VFX (not parented to enemies)
+                if (impactVfxPrefab != null)
+                {
+                    var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
+                    Destroy(vfx, 3f);
+                }
+            });
+        }
+
+        private void ApplySplashDamageAt(Vector3 position, float damage, bool isPercent, float radius)
+        {
+            if (radius <= 0f) radius = 0f;
+            float rSqr = radius * radius;
+            if (_enemyRegistry == null || _enemyRegistry.Enemies == null) return;
+            var list = _enemyRegistry.Enemies;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                var e = list[i];
+                if (e == null || e.IsDead) continue;
+                Vector3 to = e.transform.position - position;
+                if (to.sqrMagnitude <= rSqr)
+                {
+                    float dmg = damage;
+                    if (isPercent)
+                        dmg = Mathf.Max(0f, e.MaxHp) * Mathf.Max(0f, damage) * 0.01f;
+                    if (dmg > 0f)
+                        e.TakeDamage(dmg);
+                }
+            }
+        }
     }
 }

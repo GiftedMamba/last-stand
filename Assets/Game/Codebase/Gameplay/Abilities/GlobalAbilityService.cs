@@ -51,6 +51,14 @@ namespace Game.Gameplay.Abilities
                     }
                     _executor.ApplyShoied(config.Duration, config.VfxPrefab);
                     break;
+                case GlobalAbility.Cannon:
+                    if (_executor == null)
+                    {
+                        GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Cannon effect.");
+                        return;
+                    }
+                    _executor.ApplyCannon(config.Damage, config.IsPercent, config.Splash, config.VfxPrefab);
+                    break;
                 default:
                     // Other abilities to be implemented later
                     break;

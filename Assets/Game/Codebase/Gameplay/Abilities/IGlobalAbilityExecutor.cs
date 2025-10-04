@@ -33,5 +33,15 @@ namespace Game.Gameplay.Abilities
         /// <param name="durationSeconds">How long towers should be invulnerable.</param>
         /// <param name="vfxPrefab">Optional VFX prefab to spawn on each tower at activation.</param>
         void ApplyShoied(float durationSeconds, GameObject vfxPrefab);
+        
+        /// <summary>
+        /// Fires a cannon projectile with a parabolic trajectory and applies splash damage on impact.
+        /// Target acquisition is handled internally (e.g., closest enemy) for minimal integration.
+        /// </summary>
+        /// <param name="damage">Damage per target within splash. Interpreted as percent of Max HP when isPercent is true.</param>
+        /// <param name="isPercent">When true, damage is a percentage of Max HP.</param>
+        /// <param name="splashRadius">World-space radius for area-of-effect.</param>
+        /// <param name="impactVfxPrefab">Optional VFX prefab spawned at impact point.</param>
+        void ApplyCannon(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab);
     }
 }

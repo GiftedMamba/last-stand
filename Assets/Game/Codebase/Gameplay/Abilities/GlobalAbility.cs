@@ -5,7 +5,7 @@
     {
         Stun,
         Howl,
-        Splash,
+        Cannon,
         Shield
     }
 }
