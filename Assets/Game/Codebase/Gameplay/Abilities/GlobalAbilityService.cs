@@ -43,7 +43,7 @@ namespace Game.Gameplay.Abilities
                     }
                     _executor.ApplyHowl(config.Duration, config.Damage, config.IsPercent, config.VfxPrefab);
                     break;
-                case GlobalAbility.Shoied:
+                case GlobalAbility.Shield:
                     if (_executor == null)
                     {
                         GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Shoied effect.");
