@@ -1246,6 +1246,7 @@ MonoBehaviour:
   _spawnRadius: 0
   _spawnRandomLoop: 1
   _delaySeconds: 5
+  _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &711211743
 Transform:
@@ -3211,6 +3212,7 @@ MonoBehaviour:
   _spawnRadius: 0
   _spawnRandomLoop: 1
   _delaySeconds: 5
+  _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!1001 &1773605920
 PrefabInstance:
@@ -3577,6 +3579,7 @@ MonoBehaviour:
   _spawnRadius: 0
   _spawnRandomLoop: 1
   _delaySeconds: 5
+  _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &1903687902
 Transform:

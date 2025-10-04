@@ -25,12 +25,14 @@ namespace Game.Gameplay.Enemies
         [Header("Random Loop Spawning")]
         [SerializeField] private bool _spawnRandomLoop = false;
         [SerializeField, Min(0.1f)] private float _delaySeconds = 2f;
+        [SerializeField, Min(0f)] private float _timeDisplacement = 0f; // per-spawner offset range [0..timeDisplacement]
 
         [Header("Runtime References")]
         [SerializeField] private EnemyRegistry _enemyRegistry;
 
         private Coroutine _loopCoroutine;
         private bool _stopped;
+        private float _desyncOffset; // computed once per spawner
 
         private void OnEnable()
         {
@@ -52,6 +54,8 @@ namespace Game.Gameplay.Enemies
 
             if (_spawnRandomLoop)
             {
+                // compute per-spawner offset once to desync spawners without delaying the very first spawn
+                _desyncOffset = _timeDisplacement > 0f ? Random.Range(0f, _timeDisplacement) : 0f;
                 _loopCoroutine = StartCoroutine(SpawnRandomLoop());
             }
         }
@@ -107,9 +111,37 @@ namespace Game.Gameplay.Enemies
                 yield break;
             }
 
+            // Initial desync before the very first spawn to avoid simultaneous starts across spawners
+            if (!_stopped)
+            {
+                float upper = Mathf.Max(0.1f, _timeDisplacement);
+                float initialDelay = Random.Range(0.1f, upper);
+                yield return new WaitForSeconds(initialDelay);
+            }
+
+            // First spawn after desync delay
+            if (!_stopped)
+            {
+                int firstIdx = Random.Range(0, _enemyConfigs.Count);
+                var firstCfg = _enemyConfigs[firstIdx];
+                if (firstCfg != null)
+                {
+                    Vector3 firstPos = transform.position;
+                    if (_spawnRadius > 0f)
+                    {
+                        var offset = Random.insideUnitCircle * _spawnRadius;
+                        firstPos += new Vector3(offset.x, 0f, offset.y);
+                    }
+                    Spawn(firstCfg, firstPos, transform.rotation);
+                }
+            }
+
+            // Subsequent spawns use base delay plus per-spawner desync offset
             while (!_stopped)
             {
-                // select random config
+                float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
+                yield return new WaitForSeconds(wait);
+
                 int idx = Random.Range(0, _enemyConfigs.Count);
                 var cfg = _enemyConfigs[idx];
                 if (cfg == null)
@@ -126,8 +158,6 @@ namespace Game.Gameplay.Enemies
                     }
                     Spawn(cfg, pos, transform.rotation);
                 }
-
-                yield return new WaitForSeconds(Mathf.Max(0.01f, _delaySeconds));
             }
         }
 
