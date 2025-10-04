@@ -155,6 +155,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - If you need to control timescale, use dedicated service for it
 - Use Dotween for UI animations
 - Use IObjectResolver.Instantiate for creating new objects, not Instantiate to have all dependencies injected.
+- Do not use hardcoded strings. Declare constants in class level, or separate class for similar entities, for isntance ScreenNames.cs
 
 ## 8. Layering & Ownership
 

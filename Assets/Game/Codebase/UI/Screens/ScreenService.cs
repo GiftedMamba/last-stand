@@ -38,6 +38,16 @@ namespace Game.UI.Screens
 
             var instance = Object.Instantiate(prefab, _uiRoot, worldPositionStays: false);
             instance.name = prefab.name; // clean instance name
+
+            // Special-case: ensure LevelUpScreen can be closed via its OK button without prefab changes
+            if (prefabName == "LevelUpScreen")
+            {
+                if (instance.GetComponent<LevelUpScreenBehaviour>() == null)
+                {
+                    instance.AddComponent<LevelUpScreenBehaviour>();
+                }
+            }
+
             return instance;
         }
     }

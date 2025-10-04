@@ -346,6 +346,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5738598009235765362}
   - component: {fileID: 2629649173987189916}
+  - component: {fileID: -3773638086704350576}
   m_Layer: 5
   m_Name: LevelUpScreen
   m_TagString: Untagged
@@ -382,6 +383,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4776611699334768019}
   m_CullTransparentMesh: 1
+--- !u!114 &-3773638086704350576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4776611699334768019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b9db78558e4ae3a3521d4695847785, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.LevelUpScreenBehaviour
+  _okButton: {fileID: 6131574606997003792}
 --- !u!1 &5811989929233194257
 GameObject:
   m_ObjectHideFlags: 0

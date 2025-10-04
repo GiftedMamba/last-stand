@@ -8,6 +8,7 @@ using Game.Configs;
 using Game.Gameplay.Abilities;
 using Game.Presentation.Camera;
 using Game.Gameplay.Enemies;
+using Game.Gameplay.LevelUp;
 
 namespace Game.Scopes
 {
@@ -53,6 +54,9 @@ namespace Game.Scopes
             // Ensure scene components with [Inject] receive dependencies
             builder.RegisterComponentInHierarchy<GameOverController>();
             builder.RegisterComponentInHierarchy<Game.UI.GlobalAbilityButton>();
+
+            // Level up screen trigger as an entry point service
+            builder.RegisterEntryPoint<LevelUpService>();
 
             // Allow EnemySpawner to receive IObjectResolver for DI instantiation of enemies
             builder.RegisterComponentInHierarchy<EnemySpawner>();
