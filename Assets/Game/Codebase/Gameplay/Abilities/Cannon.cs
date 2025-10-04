@@ -17,7 +17,13 @@ namespace Game.Gameplay.Abilities
         [SerializeField, Min(1f)] private float _forwardDistance = 15f;
         [SerializeField] private LayerMask _groundMask = ~0; // default to everything
 
-        public bool IsReady => (_launchPoint != null) && (_projectilePrefab != null);
+        [Header("Fire Control")]
+        [Tooltip("Cooldown between consecutive shots (seconds).")]
+        [SerializeField, Min(0f)] private float _fireCooldown = 0.75f;
+
+        private float _nextReadyTime;
+
+        public bool IsReady => (_launchPoint != null) && (_projectilePrefab != null) && Time.time >= _nextReadyTime;
         public Transform LaunchPoint => _launchPoint != null ? _launchPoint : transform;
 
         /// <summary>
@@ -42,8 +48,12 @@ namespace Game.Gameplay.Abilities
                 target.y = start.y;
             }
 
-            var proj = Instantiate(_projectilePrefab, start, Quaternion.identity, transform);
+            // Instantiate with explicit world position and rotation so Awake() of the projectile sees correct transform
+            var proj = Instantiate(_projectilePrefab, start, lp.rotation);
             proj.Init(start, target, _arcHeight, _flightTime, onImpact);
+
+            // Set next ready time based on cooldown
+            _nextReadyTime = Time.time + Mathf.Max(0f, _fireCooldown);
             return proj;
         }
     }

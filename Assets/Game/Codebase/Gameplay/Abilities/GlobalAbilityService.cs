@@ -57,7 +57,7 @@ namespace Game.Gameplay.Abilities
                         GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Cannon effect.");
                         return;
                     }
-                    _executor.ApplyCannon(config.Damage, config.IsPercent, config.Splash, config.VfxPrefab);
+                    _executor.ApplyCannon(config.Duration, config.Damage, config.IsPercent, config.Splash, config.VfxPrefab);
                     break;
                 default:
                     // Other abilities to be implemented later

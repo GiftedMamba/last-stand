@@ -35,13 +35,14 @@ namespace Game.Gameplay.Abilities
         void ApplyShoied(float durationSeconds, GameObject vfxPrefab);
         
         /// <summary>
-        /// Fires a cannon projectile with a parabolic trajectory and applies splash damage on impact.
-        /// Target acquisition is handled internally (e.g., closest enemy) for minimal integration.
+        /// Continuously fires cannon projectiles while the ability is active and applies splash damage on each impact.
+        /// If a Cannon is assigned in the scene, it is used; otherwise a fallback projectile is spawned.
         /// </summary>
+        /// <param name="durationSeconds">How long the cannon should keep firing.</param>
         /// <param name="damage">Damage per target within splash. Interpreted as percent of Max HP when isPercent is true.</param>
         /// <param name="isPercent">When true, damage is a percentage of Max HP.</param>
         /// <param name="splashRadius">World-space radius for area-of-effect.</param>
         /// <param name="impactVfxPrefab">Optional VFX prefab spawned at impact point.</param>
-        void ApplyCannon(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab);
+        void ApplyCannon(float durationSeconds, float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab);
     }
 }

@@ -377,25 +377,62 @@ namespace Game.Gameplay.Abilities
             _howlUntil = 0f;
         }
 
-        public void ApplyCannon(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
+        // Cannon continuous fire state
+        private float _cannonFireUntil;
+        private Coroutine _cannonFireRoutine;
+
+        public void ApplyCannon(float durationSeconds, float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
         {
-            // Prefer using dedicated Cannon if assigned
-            if (_cannon != null && _cannon.IsReady)
-            {
-                _cannon.Fire(impactPos =>
-                {
-                    _cameraShake?.StartShake();
-                    ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
-                    if (impactVfxPrefab != null)
-                    {
-                        var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
-                        Destroy(vfx, 3f);
-                    }
-                });
+            if (durationSeconds <= 0f)
                 return;
+
+            float newUntil = Time.time + durationSeconds;
+            if (_cannonFireUntil < newUntil)
+                _cannonFireUntil = newUntil;
+
+            if (_cannonFireRoutine == null)
+                _cannonFireRoutine = StartCoroutine(CannonFireCoroutine(damage, isPercent, splashRadius, impactVfxPrefab));
+        }
+
+        private IEnumerator CannonFireCoroutine(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
+        {
+            // Fallback interval approximates projectile flight time
+            const float fallbackInterval = 1.25f;
+            float nextFallbackTime = 0f;
+            while (Time.time < _cannonFireUntil)
+            {
+                if (_cannon != null && _cannon.IsReady)
+                {
+                    _cannon.Fire(impactPos =>
+                    {
+                        _cameraShake?.StartShake();
+                        ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
+                        if (impactVfxPrefab != null)
+                        {
+                            var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
+                            Destroy(vfx, 3f);
+                        }
+                    });
+                }
+                else
+                {
+                    if (Time.time >= nextFallbackTime)
+                    {
+                        // Fallback: compute a target from enemies and spawn a simple projectile directly
+                        FireFallbackProjectile(damage, isPercent, splashRadius, impactVfxPrefab);
+                        nextFallbackTime = Time.time + fallbackInterval;
+                    }
+                }
+
+                yield return null;
             }
 
-            // Fallback: compute a target from enemies and spawn a simple projectile directly
+            _cannonFireRoutine = null;
+            _cannonFireUntil = 0f;
+        }
+
+        private void FireFallbackProjectile(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
+        {
             Vector3 targetPos = Vector3.zero;
             int count = 0;
             if (_enemyRegistry != null && _enemyRegistry.Enemies != null)

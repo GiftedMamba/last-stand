@@ -33,6 +33,17 @@ namespace Game.Gameplay.Abilities
             _arcHeight = Mathf.Max(0f, arcHeight);
             _duration = Mathf.Max(0.001f, duration);
             _onImpact = onImpact;
+
+            // If there is a Rigidbody attached (from a visual prefab), neutralize physics to avoid spawn snapping
+            if (TryGetComponent<Rigidbody>(out var rb))
+            {
+                rb.isKinematic = true;
+                rb.useGravity = false;
+                rb.velocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.position = start;
+            }
+
             transform.position = _start;
 
             // Create a simple visual if none provided in the prefab

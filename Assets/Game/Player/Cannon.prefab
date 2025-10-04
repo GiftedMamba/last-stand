@@ -135,6 +135,7 @@ MonoBehaviour:
   _groundMask:
     serializedVersion: 2
     m_Bits: 192
+  _fireCooldown: 1
 --- !u!4 &6141855355188393244 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3418614552145279298, guid: ea15ebbf367894f6895777bfe09b2903, type: 3}
