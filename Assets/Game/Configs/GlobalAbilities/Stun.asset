@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Stun
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.GlobalAbilityConfig
   _ability: 0
-  _cooldown: 20
-  _duration: 5
-  _damage: 50
-  _isPercent: 0
+  _levels:
+  - _cooldown: 20
+    _duration: 5
+    _damage: 50
+    _isPercent: 0
+    _splash: 0
+  _vfxPrefab: {fileID: 0}

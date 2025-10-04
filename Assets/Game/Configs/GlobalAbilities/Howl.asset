@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Howl
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.GlobalAbilityConfig
   _ability: 1
-  _cooldown: 20
-  _duration: 5
-  _damage: 50
-  _isPercent: 1
+  _levels:
+  - _cooldown: 20
+    _duration: 5
+    _damage: 100
+    _isPercent: 1
+    _splash: 0
   _vfxPrefab: {fileID: 6126188424833946103, guid: a58aa9a78f2b45b45bb0f3e2e1e3ad3c, type: 3}

@@ -66,12 +66,23 @@ namespace Game.UI
 
         private void StartCooldownVisual()
         {
+            // Prefer level-aware cooldown from service; fallback to catalog for safety
             float cooldown = 0f;
-            if (_catalog != null)
+            if (_service != null)
+            {
+                var level = _service.GetCurrentLevel(_ability);
+                if (level != null)
+                    cooldown = Mathf.Max(0f, level.Cooldown);
+            }
+            if (cooldown <= 0f && _catalog != null)
             {
                 var config = _catalog.Get(_ability);
                 if (config != null)
-                    cooldown = Mathf.Max(0f, config.Cooldown);
+                {
+                    var level0 = config.GetLevel(0);
+                    if (level0 != null)
+                        cooldown = Mathf.Max(0f, level0.Cooldown);
+                }
             }
 
             // Disable button during cooldown
