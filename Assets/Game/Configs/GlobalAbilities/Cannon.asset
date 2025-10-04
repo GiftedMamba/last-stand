@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Cannon
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.GlobalAbilityConfig
   _ability: 2
-  _cooldown: 20
-  _duration: 5
-  _damage: 50
-  _isPercent: 1
-  _vfxPrefab: {fileID: 0}
+  _cooldown: 1
+  _duration: 1
+  _damage: 100
+  _isPercent: 0
+  _splash: 2
+  _vfxPrefab: {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473, type: 3}

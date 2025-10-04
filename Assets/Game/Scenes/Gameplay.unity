@@ -3195,6 +3195,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Abilities.GlobalAbilityExecutor
   _enemyRegistry: {fileID: 594568889}
+  _cannon: {fileID: 0}
 --- !u!114 &1683796639
 MonoBehaviour:
   m_ObjectHideFlags: 0

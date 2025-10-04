@@ -18,6 +18,8 @@ namespace Game.Gameplay.Abilities
     {
         [Header("Scene References")]
         [SerializeField] private EnemyRegistry _enemyRegistry;
+        [Tooltip("Cannon used to fire cannon projectiles from a specific launch point.")]
+        [SerializeField] private Cannon _cannon;
 
         private float _stunUntil;
         private Coroutine _stunRoutine;
@@ -377,7 +379,23 @@ namespace Game.Gameplay.Abilities
 
         public void ApplyCannon(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
         {
-            // Select target position: average of alive enemies, fallback to world origin
+            // Prefer using dedicated Cannon if assigned
+            if (_cannon != null && _cannon.IsReady)
+            {
+                _cannon.Fire(impactPos =>
+                {
+                    _cameraShake?.StartShake();
+                    ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
+                    if (impactVfxPrefab != null)
+                    {
+                        var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
+                        Destroy(vfx, 3f);
+                    }
+                });
+                return;
+            }
+
+            // Fallback: compute a target from enemies and spawn a simple projectile directly
             Vector3 targetPos = Vector3.zero;
             int count = 0;
             if (_enemyRegistry != null && _enemyRegistry.Enemies != null)
@@ -396,26 +414,18 @@ namespace Game.Gameplay.Abilities
             else
                 targetPos = Vector3.zero;
 
-            // Raise target slightly to avoid ground clipping
             float groundY = targetPos.y;
-
-            // Define a simple launch offset to create an arc coming from the side and above
             Vector3 startPos = targetPos + new Vector3(-6f, 8f, -6f);
 
-            // Spawn projectile GameObject and initialize arc
             var go = new GameObject("CannonProjectile");
             var proj = go.AddComponent<CannonProjectile>();
-            // Parent to this executor for hierarchy tidiness
             go.transform.SetParent(transform);
             float arcHeight = 6f;
             float flightTime = 1.25f;
             proj.Init(startPos, new Vector3(targetPos.x, groundY, targetPos.z), arcHeight, flightTime, impactPos =>
             {
-                // Camera feedback
                 _cameraShake?.StartShake();
-                // Apply AoE damage
                 ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
-                // Spawn impact VFX (not parented to enemies)
                 if (impactVfxPrefab != null)
                 {
                     var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
