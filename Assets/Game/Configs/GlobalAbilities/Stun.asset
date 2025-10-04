@@ -15,3 +15,5 @@ MonoBehaviour:
   _ability: 0
   _cooldown: 20
   _duration: 5
+  _damage: 50
+  _isPercent: 0

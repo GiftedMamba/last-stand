@@ -40,7 +40,7 @@ namespace Game.Gameplay.Abilities
             _cameraShake = cameraShake;
         }
 
-        public void StunForSeconds(float durationSeconds)
+        public void StunForSeconds(float durationSeconds, float damageOnce, bool isPercent)
         {
             if (durationSeconds <= 0f)
                 return;
@@ -60,10 +60,46 @@ namespace Game.Gameplay.Abilities
             // Immediately enforce stop on newly added enemies
             ForceStopStunnedEnemies();
 
+            // Deal damage once on activation (to the currently captured enemies)
+            if (damageOnce > 0f)
+            {
+                DealDamageOnceToCapturedStunned(damageOnce, isPercent);
+            }
+
             // Start coroutine if not running
             if (_stunRoutine == null)
             {
                 _stunRoutine = StartCoroutine(StunCoroutine());
+            }
+        }
+
+        private void DealDamageOnceToCapturedStunned(float damageOnce, bool isPercent)
+        {
+            if (_stunnedEnemies.Count == 0) return;
+            List<Enemy> toRemove = null;
+            foreach (var e in _stunnedEnemies)
+            {
+                if (e == null || e.IsDead)
+                {
+                    toRemove ??= new List<Enemy>();
+                    toRemove.Add(e);
+                    continue;
+                }
+
+                float dmg = damageOnce;
+                if (isPercent)
+                {
+                    // Interpret percentage as percent of Max HP
+                    dmg = Mathf.Max(0f, e.MaxHp) * Mathf.Max(0f, damageOnce) * 0.01f;
+                }
+                if (dmg > 0f)
+                    e.TakeDamage(dmg);
+            }
+
+            if (toRemove != null)
+            {
+                for (int i = 0; i < toRemove.Count; i++)
+                    _stunnedEnemies.Remove(toRemove[i]);
             }
         }
 
@@ -165,14 +201,18 @@ namespace Game.Gameplay.Abilities
             }
         }
 
-        public void ApplyHowl(float durationSeconds, float damagePercent)
+        public void ApplyHowl(float durationSeconds, float value, bool isPercent)
         {
-            if (durationSeconds <= 0f || damagePercent <= 0f)
+            if (durationSeconds <= 0f)
+                return;
+
+            // Only percent mode is supported for Howl. If not percent, ignore the value.
+            if (!isPercent || value <= 0f)
                 return;
 
             float now = Time.time;
             float newUntil = now + durationSeconds;
-            _howlPercent = Mathf.Max(0f, damagePercent);
+            _howlPercent = Mathf.Max(0f, value);
             if (_howlUntil < newUntil)
                 _howlUntil = newUntil;
 
