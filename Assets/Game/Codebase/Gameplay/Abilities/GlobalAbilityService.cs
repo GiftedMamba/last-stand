@@ -33,7 +33,7 @@ namespace Game.Gameplay.Abilities
                         GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Stun effect.");
                         return;
                     }
-                    _executor.StunForSeconds(config.Duration, config.Damage, config.IsPercent);
+                    _executor.StunForSeconds(config.Duration, config.Damage, config.IsPercent, config.VfxPrefab);
                     break;
                 case GlobalAbility.Howl:
                     if (_executor == null)
@@ -41,7 +41,15 @@ namespace Game.Gameplay.Abilities
                         GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Howl effect.");
                         return;
                     }
-                    _executor.ApplyHowl(config.Duration, config.Damage, config.IsPercent);
+                    _executor.ApplyHowl(config.Duration, config.Damage, config.IsPercent, config.VfxPrefab);
+                    break;
+                case GlobalAbility.Shoied:
+                    if (_executor == null)
+                    {
+                        GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Shoied effect.");
+                        return;
+                    }
+                    _executor.ApplyShoied(config.Duration, config.VfxPrefab);
                     break;
                 default:
                     // Other abilities to be implemented later

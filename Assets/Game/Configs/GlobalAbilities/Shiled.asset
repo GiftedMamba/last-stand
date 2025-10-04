@@ -15,3 +15,6 @@ MonoBehaviour:
   _ability: 3
   _cooldown: 20
   _duration: 5
+  _damage: 0
+  _isPercent: 1
+  _vfxPrefab: {fileID: 6424583148328831481, guid: d2ffbc8b168cdf74a9dbb7c6c1cfdf2f, type: 3}

@@ -28,10 +28,15 @@ namespace Game.Configs
         [Tooltip("Interpret Damage as percent (true) or as a flat value (false). For Howl, percent is expected.")]
         [SerializeField] private bool _isPercent = true;
 
+        [Header("VFX")]
+        [Tooltip("Optional VFX prefab to spawn on each affected target when the ability is applied. If null, no VFX will be spawned.")]
+        [SerializeField] private GameObject _vfxPrefab;
+
         public GlobalAbility Ability => _ability;
         public float Cooldown => _cooldown;
         public float Duration => _duration;
         public float Damage => _damage;
         public bool IsPercent => _isPercent;
+        public GameObject VfxPrefab => _vfxPrefab;
     }
 }

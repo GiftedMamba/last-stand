@@ -6,6 +6,6 @@
         Stun,
         Howl,
         Splash,
-        Protection
+        Shoied
     }
 }

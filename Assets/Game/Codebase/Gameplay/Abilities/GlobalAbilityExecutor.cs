@@ -5,6 +5,7 @@ using Game.Gameplay.Enemies;
 using UnityEngine;
 using VContainer;
 using Game.Presentation.Camera;
+using Game.Gameplay.Towers;
 
 namespace Game.Gameplay.Abilities
 {
@@ -21,12 +22,14 @@ namespace Game.Gameplay.Abilities
         private float _stunUntil;
         private Coroutine _stunRoutine;
         private readonly HashSet<Enemy> _stunnedEnemies = new HashSet<Enemy>();
+        private GameObject _stunVfxPrefab;
 
         // Howl state: enemies take extra damage while active
         private float _howlUntil;
         private float _howlPercent;
         private Coroutine _howlRoutine;
         private readonly HashSet<Enemy> _howlAffected = new HashSet<Enemy>();
+        private GameObject _howlVfxPrefab;
 
         // Animator parameter IDs (centralized here for now; can be moved to a shared holder later)
         private static readonly int StunnedHash = Animator.StringToHash("Stunned");
@@ -34,16 +37,24 @@ namespace Game.Gameplay.Abilities
         // Optional camera shake injected from scene (GameplayScope registers CameraShake in hierarchy)
         private CameraShake _cameraShake;
 
+        // Shoied (shield) state: towers invulnerable while active
+        private float _shoiedUntil;
+        private Coroutine _shoiedRoutine;
+        private GameObject _shoiedVfxPrefab;
+        private readonly HashSet<TowerHealth> _shoiedVfxApplied = new HashSet<TowerHealth>();
+
         [Inject]
         public void Construct(CameraShake cameraShake)
         {
             _cameraShake = cameraShake;
         }
 
-        public void StunForSeconds(float durationSeconds, float damageOnce, bool isPercent)
+        public void StunForSeconds(float durationSeconds, float damageOnce, bool isPercent, GameObject vfxPrefab)
         {
             if (durationSeconds <= 0f)
                 return;
+
+            _stunVfxPrefab = vfxPrefab;
 
             // Trigger camera shake once per stun activation; repeated calls will extend current shake in component
             _cameraShake?.StartShake();
@@ -59,6 +70,16 @@ namespace Game.Gameplay.Abilities
             CaptureCurrentEnemiesIntoStunSet();
             // Immediately enforce stop on newly added enemies
             ForceStopStunnedEnemies();
+
+            // Spawn VFX on captured enemies once at activation
+            if (_stunVfxPrefab != null)
+            {
+                foreach (var e in _stunnedEnemies)
+                {
+                    if (e == null || e.IsDead) continue;
+                    SpawnVfxOn(e.transform, _stunVfxPrefab, durationSeconds);
+                }
+            }
 
             // Deal damage once on activation (to the currently captured enemies)
             if (damageOnce > 0f)
@@ -201,7 +222,7 @@ namespace Game.Gameplay.Abilities
             }
         }
 
-        public void ApplyHowl(float durationSeconds, float value, bool isPercent)
+        public void ApplyHowl(float durationSeconds, float value, bool isPercent, GameObject vfxPrefab)
         {
             if (durationSeconds <= 0f)
                 return;
@@ -209,6 +230,8 @@ namespace Game.Gameplay.Abilities
             // Only percent mode is supported for Howl. If not percent, ignore the value.
             if (!isPercent || value <= 0f)
                 return;
+
+            _howlVfxPrefab = vfxPrefab;
 
             float now = Time.time;
             float newUntil = now + durationSeconds;
@@ -234,6 +257,9 @@ namespace Game.Gameplay.Abilities
                 if (_howlAffected.Add(e))
                 {
                     e.SetDamageTakenBonusPercent(_howlPercent);
+                    // Spawn VFX once for newly affected enemy
+                    if (_howlVfxPrefab != null)
+                        SpawnVfxOn(e.transform, _howlVfxPrefab, Mathf.Max(0f, _howlUntil - Time.time));
                 }
                 else
                 {
@@ -242,7 +268,75 @@ namespace Game.Gameplay.Abilities
                 }
             }
         }
+        
+        public void ApplyShoied(float durationSeconds, GameObject vfxPrefab)
+        {
+            if (durationSeconds <= 0f)
+                return;
+            float newUntil = Time.time + durationSeconds;
+            if (_shoiedUntil < newUntil)
+                _shoiedUntil = newUntil;
 
+            _shoiedVfxPrefab = vfxPrefab;
+
+            // Reset tracking set for this activation
+            _shoiedVfxApplied.Clear();
+            
+            // Apply immediately
+            SetAllTowersInvulnerable(true);
+
+            if (_shoiedRoutine == null)
+                _shoiedRoutine = StartCoroutine(ShoiedCoroutine());
+        }
+
+        private void SetAllTowersInvulnerable(bool value)
+        {
+            // Non-alloc array of TowerHealth in scene (exclude inactive to avoid touching prefabs)
+            var towers = FindObjectsByType<TowerHealth>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            for (int i = 0; i < towers.Length; i++)
+            {
+                var t = towers[i];
+                if (t == null) continue;
+                if (!t.IsDead)
+                {
+                    t.SetInvulnerable(value);
+                    if (value && _shoiedVfxPrefab != null)
+                    {
+                        // ensure we only spawn once per tower per activation
+                        if (_shoiedVfxApplied.Add(t))
+                        {
+                            SpawnVfxOn(t.transform, _shoiedVfxPrefab, Mathf.Max(0f, _shoiedUntil - Time.time));
+                        }
+                    }
+                }
+            }
+        }
+
+        private IEnumerator ShoiedCoroutine()
+        {
+            // Ensure all current towers are invulnerable at start
+            SetAllTowersInvulnerable(true);
+            while (Time.time < _shoiedUntil)
+            {
+                // In case towers were spawned or toggled, re-assert
+                SetAllTowersInvulnerable(true);
+                yield return null;
+            }
+            // Clear
+            SetAllTowersInvulnerable(false);
+            _shoiedVfxApplied.Clear();
+            _shoiedRoutine = null;
+            _shoiedUntil = 0f;
+        }
+
+        private void SpawnVfxOn(Transform target, GameObject prefab, float autoDestroySeconds)
+        {
+            if (prefab == null || target == null) return;
+            var vfx = Instantiate(prefab, target.position, target.rotation, target);
+            if (autoDestroySeconds > 0f)
+                Destroy(vfx, autoDestroySeconds);
+        }
+        
         private IEnumerator HowlCoroutine()
         {
             // Ensure initial application

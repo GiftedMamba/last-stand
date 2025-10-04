@@ -15,10 +15,12 @@ namespace Game.Gameplay.Towers
     {
         [SerializeField, Min(1)] private int _maxHp = 100;
         [SerializeField, Min(0)] private int _currentHp = 100;
+        [SerializeField] private bool _invulnerable = false;
 
         public int MaxHp => _maxHp;
         public int CurrentHp => _currentHp;
         public bool IsDead => _currentHp <= 0;
+        public bool IsInvulnerable => _invulnerable;
 
         public event Action<int, int> OnDamaged; // (amount, currentHp)
         public event Action OnDied;
@@ -35,8 +37,14 @@ namespace Game.Gameplay.Towers
                 _currentHp = _maxHp;
         }
 
+        public void SetInvulnerable(bool value)
+        {
+            _invulnerable = value;
+        }
+
         public void TakeDamage(int amount)
         {
+            if (_invulnerable) return;
             if (amount <= 0 || IsDead) return;
             int prev = _currentHp;
             _currentHp = Mathf.Max(0, _currentHp - amount);
