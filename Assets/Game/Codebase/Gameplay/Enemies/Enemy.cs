@@ -33,6 +33,9 @@ namespace Game.Gameplay.Enemies
         public bool IsDead => _currentHp <= 0;
         public int Armor => _armor;
 
+        // External damage taken multiplier (e.g., Howl); 1.0 means no change
+        private float _externalDamageTakenMultiplier = 1f;
+
         public event System.Action<int, int> OnDamaged;
         public event System.Action OnDied;
 
@@ -145,7 +148,11 @@ namespace Game.Gameplay.Enemies
             // Armor reduction: 6% per armor, capped at 60%
             int effectiveArmor = Mathf.Max(0, _armor - Mathf.Max(0, armorPierce));
             float reduction = Mathf.Min(0.06f * effectiveArmor, 0.60f);
-            int dmg = Mathf.CeilToInt(baseDamage * (1f - reduction));
+
+            // Apply external damage taken multiplier (e.g., Howl)
+            float modifiedBase = Mathf.Max(0f, baseDamage) * Mathf.Max(0.01f, _externalDamageTakenMultiplier);
+
+            int dmg = Mathf.CeilToInt(modifiedBase * (1f - reduction));
             int prev = _currentHp;
             _currentHp -= Mathf.Max(1, dmg); // at least 1 dmg
             int dealt = Mathf.Max(0, prev - _currentHp);
@@ -153,6 +160,18 @@ namespace Game.Gameplay.Enemies
 
             if (_currentHp <= 0)
                 Die();
+        }
+
+        public void SetDamageTakenBonusPercent(float percent)
+        {
+            // percent is additional damage taken; 50 => 1.5x
+            float mult = 1f + Mathf.Max(0f, percent) * 0.01f;
+            _externalDamageTakenMultiplier = mult;
+        }
+
+        public void ResetDamageTakenBonus()
+        {
+            _externalDamageTakenMultiplier = 1f;
         }
 
         public void Die()

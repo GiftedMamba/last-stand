@@ -20,8 +20,13 @@ namespace Game.Configs
         [Tooltip("Active duration in seconds while the global ability effect persists.")]
         [SerializeField, Min(0f)] private float _duration = 5f;
 
+        [Header("Howl Settings")]
+        [Tooltip("Bonus damage taken by enemies while Howl is active, in percent. 50 means +50% damage taken.")]
+        [SerializeField, Min(0f)] private float _damagePercent = 0f;
+
         public GlobalAbility Ability => _ability;
         public float Cooldown => _cooldown;
         public float Duration => _duration;
+        public float DamagePercent => _damagePercent;
     }
 }

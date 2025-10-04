@@ -22,6 +22,12 @@ namespace Game.Gameplay.Abilities
         private Coroutine _stunRoutine;
         private readonly HashSet<Enemy> _stunnedEnemies = new HashSet<Enemy>();
 
+        // Howl state: enemies take extra damage while active
+        private float _howlUntil;
+        private float _howlPercent;
+        private Coroutine _howlRoutine;
+        private readonly HashSet<Enemy> _howlAffected = new HashSet<Enemy>();
+
         // Animator parameter IDs (centralized here for now; can be moved to a shared holder later)
         private static readonly int StunnedHash = Animator.StringToHash("Stunned");
 
@@ -157,6 +163,82 @@ namespace Game.Gameplay.Abilities
                 for (int i = 0; i < toRemove.Count; i++)
                     _stunnedEnemies.Remove(toRemove[i]);
             }
+        }
+
+        public void ApplyHowl(float durationSeconds, float damagePercent)
+        {
+            if (durationSeconds <= 0f || damagePercent <= 0f)
+                return;
+
+            float now = Time.time;
+            float newUntil = now + durationSeconds;
+            _howlPercent = Mathf.Max(0f, damagePercent);
+            if (_howlUntil < newUntil)
+                _howlUntil = newUntil;
+
+            CaptureCurrentEnemiesIntoHowlSetAndApply();
+
+            if (_howlRoutine == null)
+                _howlRoutine = StartCoroutine(HowlCoroutine());
+        }
+
+        private void CaptureCurrentEnemiesIntoHowlSetAndApply()
+        {
+            if (_enemyRegistry == null) return;
+            var list = _enemyRegistry.Enemies;
+            if (list == null) return;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                var e = list[i];
+                if (e == null || e.IsDead) continue;
+                if (_howlAffected.Add(e))
+                {
+                    e.SetDamageTakenBonusPercent(_howlPercent);
+                }
+                else
+                {
+                    // Refresh value in case percent changed between activations
+                    e.SetDamageTakenBonusPercent(_howlPercent);
+                }
+            }
+        }
+
+        private IEnumerator HowlCoroutine()
+        {
+            // Ensure initial application
+            CaptureCurrentEnemiesIntoHowlSetAndApply();
+
+            while (Time.time < _howlUntil)
+            {
+                // Apply to any newly spawned enemies
+                CaptureCurrentEnemiesIntoHowlSetAndApply();
+                yield return null;
+            }
+
+            // Clear effect from all affected enemies
+            if (_howlAffected.Count > 0)
+            {
+                List<Enemy> toRemove = null;
+                foreach (var e in _howlAffected)
+                {
+                    if (e == null || e.IsDead)
+                    {
+                        toRemove ??= new List<Enemy>();
+                        toRemove.Add(e);
+                        continue;
+                    }
+                    e.ResetDamageTakenBonus();
+                }
+                if (toRemove != null)
+                {
+                    for (int i = 0; i < toRemove.Count; i++)
+                        _howlAffected.Remove(toRemove[i]);
+                }
+                _howlAffected.Clear();
+            }
+
+            _howlRoutine = null;
+            _howlUntil = 0f;
         }
     }
 }

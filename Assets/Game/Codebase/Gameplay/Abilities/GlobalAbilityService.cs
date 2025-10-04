@@ -35,6 +35,14 @@ namespace Game.Gameplay.Abilities
                     }
                     _executor.StunForSeconds(config.Duration);
                     break;
+                case GlobalAbility.Howl:
+                    if (_executor == null)
+                    {
+                        GameLogger.LogWarning("[GlobalAbilityService] No executor available to apply Howl effect.");
+                        return;
+                    }
+                    _executor.ApplyHowl(config.Duration, config.DamagePercent);
+                    break;
                 default:
                     // Other abilities to be implemented later
                     break;
