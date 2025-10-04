@@ -4452,6 +4452,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -4579024259933004873, guid: fc951a105a04ca845bfe4f7e26e273bb, type: 3}
+      propertyPath: _startFireDelay
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6141855355188393235, guid: fc951a105a04ca845bfe4f7e26e273bb, type: 3}
       propertyPath: m_Name
       value: Cannon_Right

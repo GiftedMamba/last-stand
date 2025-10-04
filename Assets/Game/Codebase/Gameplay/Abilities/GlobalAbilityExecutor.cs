@@ -398,6 +398,17 @@ namespace Game.Gameplay.Abilities
                 _warnedNoCannon = true;
             }
 
+            // Reset start-fire back timer each time the ability is triggered so cannons respect StartFireDelay again
+            if (!noCannonsAssigned)
+            {
+                for (int i = 0; i < _cannons.Length; i++)
+                {
+                    var cannon = _cannons[i];
+                    if (cannon != null)
+                        cannon.ResetStartDelay();
+                }
+            }
+
             if (_cannonFireRoutine == null)
                 _cannonFireRoutine = StartCoroutine(CannonFireCoroutine(damage, isPercent, splashRadius, impactVfxPrefab));
         }

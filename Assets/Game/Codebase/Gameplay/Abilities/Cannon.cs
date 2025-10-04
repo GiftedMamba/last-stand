@@ -18,6 +18,8 @@ namespace Game.Gameplay.Abilities
         [SerializeField] private LayerMask _groundMask = ~0; // default to everything
 
         [Header("Fire Control")]
+        [Tooltip("Initial delay before the very first shot (seconds).")]
+        [SerializeField, Min(0f)] private float _startFireDelay = 0f;
         [Tooltip("Cooldown between consecutive shots (seconds).")]
         [SerializeField, Min(0f)] private float _fireCooldown = 0.75f;
 
@@ -26,12 +28,31 @@ namespace Game.Gameplay.Abilities
         public bool IsReady => (_launchPoint != null) && (_projectilePrefab != null) && Time.time >= _nextReadyTime;
         public Transform LaunchPoint => _launchPoint != null ? _launchPoint : transform;
 
+        private void Awake()
+        {
+            // Ensure the first shot is delayed by _startFireDelay
+            _nextReadyTime = Time.time + Mathf.Max(0f, _startFireDelay);
+        }
+
+        /// <summary>
+        /// Resets the start fire delay back timer so the cannon cannot fire until StartFireDelay elapses again.
+        /// Use when the Cannon ability is (re)triggered to enforce initial delay.
+        /// </summary>
+        public void ResetStartDelay()
+        {
+            _nextReadyTime = Time.time + Mathf.Max(0f, _startFireDelay);
+        }
+
         /// <summary>
         /// Fires a projectile from LaunchPoint towards LaunchPoint's forward direction.
         /// Impact position is determined at a fixed forward distance and snapped to ground via raycast.
         /// </summary>
         public CannonProjectile Fire(Action<Vector3> onImpact)
         {
+            // Enforce readiness so StartFireDelay and cooldown are always respected
+            if (!IsReady)
+                return null;
+
             var lp = LaunchPoint;
             Vector3 start = lp.position;
             Vector3 rawTarget = start + lp.forward * _forwardDistance;
