@@ -35,8 +35,8 @@ namespace Game.Gameplay.Abilities
         void ApplyShoied(float durationSeconds, GameObject vfxPrefab);
         
         /// <summary>
-        /// Continuously fires cannon projectiles while the ability is active and applies splash damage on each impact.
-        /// If a Cannon is assigned in the scene, it is used; otherwise a fallback projectile is spawned.
+        /// Continuously commands the scene Cannon to fire while the ability is active and applies splash damage on each impact.
+        /// Requires a Cannon assigned in the scene; no fallback projectile will be spawned by the executor.
         /// </summary>
         /// <param name="durationSeconds">How long the cannon should keep firing.</param>
         /// <param name="damage">Damage per target within splash. Interpreted as percent of Max HP when isPercent is true.</param>

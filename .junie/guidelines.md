@@ -151,6 +151,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - Schedule timers or cooldowns for things like abilities or any other gameplay logic in dedicated services, do not use cooldowns inside UI layer for gameplay logic!
 - If you register in scopes services, which inherited from Monobehavior, use [SerializedFied] and register them in Container, not from hierarchy.
 - Enums should be numbered from 0, always use Unknown = 0 as a first value.
+- Do not use velocity of Rigidbody, it is obsolte. Use linearVlocity instead
 
 ## 8. Layering & Ownership
 

@@ -50,6 +50,13 @@ namespace Game.Gameplay.Abilities
 
             // Instantiate with explicit world position and rotation so Awake() of the projectile sees correct transform
             var proj = Instantiate(_projectilePrefab, start, lp.rotation);
+
+            // Ensure projectile starts exactly at LaunchPoint: parent it and zero local transform
+            var projTransform = proj.transform;
+            projTransform.SetParent(lp, true);
+            projTransform.localPosition = Vector3.zero;
+            projTransform.localRotation = Quaternion.identity;
+
             proj.Init(start, target, _arcHeight, _flightTime, onImpact);
 
             // Set next ready time based on cooldown

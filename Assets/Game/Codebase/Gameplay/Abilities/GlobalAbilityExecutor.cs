@@ -18,8 +18,8 @@ namespace Game.Gameplay.Abilities
     {
         [Header("Scene References")]
         [SerializeField] private EnemyRegistry _enemyRegistry;
-        [Tooltip("Cannon used to fire cannon projectiles from a specific launch point.")]
-        [SerializeField] private Cannon _cannon;
+        [Tooltip("Cannons used to fire projectiles from specific launch points. Assign one or more.")]
+        [SerializeField] private Cannon[] _cannons;
 
         private float _stunUntil;
         private Coroutine _stunRoutine;
@@ -380,6 +380,7 @@ namespace Game.Gameplay.Abilities
         // Cannon continuous fire state
         private float _cannonFireUntil;
         private Coroutine _cannonFireRoutine;
+        private bool _warnedNoCannon;
 
         public void ApplyCannon(float durationSeconds, float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
         {
@@ -390,37 +391,38 @@ namespace Game.Gameplay.Abilities
             if (_cannonFireUntil < newUntil)
                 _cannonFireUntil = newUntil;
 
+            bool noCannonsAssigned = _cannons == null || _cannons.Length == 0;
+            if (noCannonsAssigned && !_warnedNoCannon)
+            {
+                Game.Core.GameLogger.LogWarning("[GlobalAbilityExecutor] No Cannons assigned in scene. Cannon ability will not fire.");
+                _warnedNoCannon = true;
+            }
+
             if (_cannonFireRoutine == null)
                 _cannonFireRoutine = StartCoroutine(CannonFireCoroutine(damage, isPercent, splashRadius, impactVfxPrefab));
         }
 
         private IEnumerator CannonFireCoroutine(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
         {
-            // Fallback interval approximates projectile flight time
-            const float fallbackInterval = 1.25f;
-            float nextFallbackTime = 0f;
             while (Time.time < _cannonFireUntil)
             {
-                if (_cannon != null && _cannon.IsReady)
+                if (_cannons != null && _cannons.Length > 0)
                 {
-                    _cannon.Fire(impactPos =>
+                    for (int i = 0; i < _cannons.Length; i++)
                     {
-                        _cameraShake?.StartShake();
-                        ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
-                        if (impactVfxPrefab != null)
+                        var cannon = _cannons[i];
+                        if (cannon == null) continue;
+                        if (!cannon.IsReady) continue;
+                        cannon.Fire(impactPos =>
                         {
-                            var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
-                            Destroy(vfx, 3f);
-                        }
-                    });
-                }
-                else
-                {
-                    if (Time.time >= nextFallbackTime)
-                    {
-                        // Fallback: compute a target from enemies and spawn a simple projectile directly
-                        FireFallbackProjectile(damage, isPercent, splashRadius, impactVfxPrefab);
-                        nextFallbackTime = Time.time + fallbackInterval;
+                            _cameraShake?.StartShake();
+                            ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
+                            if (impactVfxPrefab != null)
+                            {
+                                var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
+                                Destroy(vfx, 3f);
+                            }
+                        });
                     }
                 }
 
@@ -429,46 +431,7 @@ namespace Game.Gameplay.Abilities
 
             _cannonFireRoutine = null;
             _cannonFireUntil = 0f;
-        }
-
-        private void FireFallbackProjectile(float damage, bool isPercent, float splashRadius, GameObject impactVfxPrefab)
-        {
-            Vector3 targetPos = Vector3.zero;
-            int count = 0;
-            if (_enemyRegistry != null && _enemyRegistry.Enemies != null)
-            {
-                var list = _enemyRegistry.Enemies;
-                for (int i = 0; i < list.Count; i++)
-                {
-                    var e = list[i];
-                    if (e == null || e.IsDead) continue;
-                    targetPos += e.transform.position;
-                    count++;
-                }
-            }
-            if (count > 0)
-                targetPos /= count;
-            else
-                targetPos = Vector3.zero;
-
-            float groundY = targetPos.y;
-            Vector3 startPos = targetPos + new Vector3(-6f, 8f, -6f);
-
-            var go = new GameObject("CannonProjectile");
-            var proj = go.AddComponent<CannonProjectile>();
-            go.transform.SetParent(transform);
-            float arcHeight = 6f;
-            float flightTime = 1.25f;
-            proj.Init(startPos, new Vector3(targetPos.x, groundY, targetPos.z), arcHeight, flightTime, impactPos =>
-            {
-                _cameraShake?.StartShake();
-                ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
-                if (impactVfxPrefab != null)
-                {
-                    var vfx = Instantiate(impactVfxPrefab, impactPos, Quaternion.identity);
-                    Destroy(vfx, 3f);
-                }
-            });
+            _warnedNoCannon = false;
         }
 
         private void ApplySplashDamageAt(Vector3 position, float damage, bool isPercent, float radius)

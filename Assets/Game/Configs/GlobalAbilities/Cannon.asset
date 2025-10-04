@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Cannon
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.GlobalAbilityConfig
   _ability: 2
-  _cooldown: 1
-  _duration: 1
+  _cooldown: 20
+  _duration: 5
   _damage: 100
   _isPercent: 0
   _splash: 2
