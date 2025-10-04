@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Game.Configs
 {
@@ -21,6 +22,10 @@ namespace Game.Configs
         [SerializeField, Min(0)] private int _basePierceCount = 0; // how many enemies projectile can pierce through
         [SerializeField, Range(1,5)] private int _attackCount = 1; // number of simultaneous shots (1..5)
 
+        [Header("Progression")]
+        [Tooltip("Each entry is the experience required to reach the next level from the current level. Index 0 = XP to go from level 1 to level 2, and so on.")]
+        [SerializeField] private int[] _experienceToNextLevel = new int[0];
+
         public GameObject PlayerPrefab => _playerPrefab;
         public GameObject ProjectilePrefab => _projectilePrefab;
         public float BaseDamage => _baseDamage;
@@ -28,5 +33,27 @@ namespace Game.Configs
         public float BaseProjectileSpeed => _baseProjectileSpeed;
         public int BasePierceCount => _basePierceCount;
         public int AttackCount => _attackCount;
+
+        /// <summary>
+        /// Ordered list of XP requirements to advance from level N to N+1.
+        /// </summary>
+        public IReadOnlyList<int> ExperienceToNextLevel => _experienceToNextLevel;
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (_experienceToNextLevel == null)
+            {
+                _experienceToNextLevel = new int[0];
+                return;
+            }
+
+            for (int i = 0; i < _experienceToNextLevel.Length; i++)
+            {
+                if (_experienceToNextLevel[i] < 0)
+                    _experienceToNextLevel[i] = 0;
+            }
+        }
+#endif
     }
 }
