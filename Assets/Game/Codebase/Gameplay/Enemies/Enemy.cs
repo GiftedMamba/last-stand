@@ -23,6 +23,10 @@ namespace Game.Gameplay.Enemies
 
         private bool _isDying;
 
+        // Animator parameter IDs
+        private static readonly int SpeedHash = Animator.StringToHash("Speed");
+        private static readonly int DeadHash = Animator.StringToHash("Dead");
+
         public EnemyConfig Config => _config;
         public int CurrentHp => _currentHp;
         public int MaxHp => _config != null ? Mathf.Max(1, _config.MaxHp) : Mathf.Max(1, _currentHp);
@@ -50,6 +54,10 @@ namespace Game.Gameplay.Enemies
 
             InitializeFromConfig(_config);
             AcquireAndMoveToTarget();
+
+            // Initialize locomotion to idle
+            if (_animator != null)
+                _animator.SetFloat(SpeedHash, 0f);
         }
 
         private void Update()
@@ -68,6 +76,24 @@ namespace Game.Gameplay.Enemies
                     // Ensure destination is still set correctly (target may have moved)
                     _agent.SetDestination(_currentTarget.Position);
                 }
+            }
+
+            // Drive locomotion blend tree via Speed parameter (0..1)
+            if (_animator != null)
+            {
+                float vel = 0f;
+                float max = 1f;
+                if (_agent != null)
+                {
+                    vel = _agent.velocity.magnitude;
+                    max = Mathf.Max(0.01f, _agent.speed);
+                    if (_agent.isStopped || !_agent.isOnNavMesh)
+                        vel = 0f;
+                }
+
+                float speed01 = Mathf.Clamp01(vel / max);
+                // small damping for smoother transitions
+                _animator.SetFloat(SpeedHash, speed01, 0.1f, Time.deltaTime);
             }
         }
 
@@ -101,6 +127,9 @@ namespace Game.Gameplay.Enemies
                 {
                     _agent.ResetPath();
                 }
+                // Ensure idle animation
+                if (_animator != null)
+                    _animator.SetFloat(SpeedHash, 0f);
                 return;
             }
 
@@ -159,7 +188,9 @@ namespace Game.Gameplay.Enemies
             // Play end animation if Animator is present
             if (_animator != null)
             {
-                _animator.SetTrigger("Dead");
+                // ensure locomotion settles to idle
+                _animator.SetFloat(SpeedHash, 0f);
+                _animator.SetTrigger(DeadHash);
             }
 
             // Delay destruction to allow animation to finish
