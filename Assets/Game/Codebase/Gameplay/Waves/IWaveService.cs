@@ -13,6 +13,11 @@ namespace Game.Gameplay.Waves
         IReadOnlyList<EnemyType> AllowedTypes { get; }
 
         /// <summary>
+        /// Remaining time in seconds for the current wave. Returns 0 when there is no active wave or waves are finished.
+        /// </summary>
+        float CurrentWaveRemaining { get; }
+
+        /// <summary>
         /// True when the last wave has completed.
         /// </summary>
         bool IsFinished { get; }

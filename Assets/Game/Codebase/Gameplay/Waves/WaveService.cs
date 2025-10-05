@@ -28,6 +28,18 @@ namespace Game.Gameplay.Waves
         }
 
         public IReadOnlyList<EnemyType> AllowedTypes => _allowedTypes;
+        public float CurrentWaveRemaining
+        {
+            get
+            {
+                var waves = _config?.Waves;
+                if (_finished || waves == null || waves.Count == 0 || _currentWaveIndex < 0)
+                    return 0f;
+                float currentDuration = Math.Max(0.01f, waves[_currentWaveIndex].Time);
+                var rem = currentDuration - _waveElapsed;
+                return rem > 0f ? rem : 0f;
+            }
+        }
         public bool IsFinished => _finished;
         public event Action Finished;
 

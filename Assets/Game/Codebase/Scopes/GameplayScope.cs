@@ -10,6 +10,7 @@ using Game.Presentation.Camera;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.LevelUp;
 using Game.Gameplay.Waves;
+using Game.UI.Hud;
 
 namespace Game.Scopes
 {
@@ -77,6 +78,9 @@ namespace Game.Scopes
             {
                 Game.Core.GameLogger.LogError("GameplayScope: EnemyConfigCatalog is not assigned. Spawners will not be able to spawn enemies.");
             }
+
+            // UI HUD
+            builder.RegisterComponentInHierarchy<Hud>();
 
             builder.RegisterComponentInHierarchy<EnemySpawner>();
         }
