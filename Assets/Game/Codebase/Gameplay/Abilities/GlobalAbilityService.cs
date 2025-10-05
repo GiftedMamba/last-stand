@@ -1,4 +1,5 @@
-﻿using Game.Configs;
+﻿using System.Collections.Generic;
+using Game.Configs;
 using Game.Core;
 
 namespace Game.Gameplay.Abilities
@@ -8,14 +9,24 @@ namespace Game.Gameplay.Abilities
         private readonly GlobalAbilityCatalog _catalog;
         private readonly IGlobalAbilityExecutor _executor;
 
-        // In the current iteration, all abilities start at level 0.
-        // Future iterations can evolve this into a persisted progression map.
-        private const int DefaultLevelIndex = 0;
+        // Track current level per ability (starts at 0)
+        private readonly Dictionary<GlobalAbility, int> _levels = new();
 
         public GlobalAbilityService(GlobalAbilityCatalog catalog, IGlobalAbilityExecutor executor)
         {
             _catalog = catalog;
             _executor = executor;
+
+            // Initialize known abilities to level 0
+            if (_catalog != null && _catalog.Configs != null)
+            {
+                foreach (var cfg in _catalog.Configs)
+                {
+                    if (cfg == null) continue;
+                    if (!_levels.ContainsKey(cfg.Ability))
+                        _levels[cfg.Ability] = 0;
+                }
+            }
         }
 
         public void Trigger(GlobalAbility ability)
@@ -27,7 +38,8 @@ namespace Game.Gameplay.Abilities
                 return;
             }
 
-            var level = BuildLevel(config, DefaultLevelIndex);
+            var levelIndex = GetLevelIndex(ability);
+            var level = BuildLevel(config, levelIndex);
             GameLogger.Log($"[GlobalAbilityService] Triggered {ability} | L{level.LevelIndex} Cooldown={level.Cooldown}s, Duration={level.Duration}s");
 
             switch (ability)
@@ -74,7 +86,31 @@ namespace Game.Gameplay.Abilities
         {
             var config = _catalog != null ? _catalog.Get(ability) : null;
             if (config == null) return null;
-            return BuildLevel(config, DefaultLevelIndex);
+            var levelIndex = GetLevelIndex(ability);
+            return BuildLevel(config, levelIndex);
+        }
+
+        public void IncreaseLevel(GlobalAbility ability)
+        {
+            var config = _catalog != null ? _catalog.Get(ability) : null;
+            if (config == null)
+            {
+                GameLogger.LogWarning($"[GlobalAbilityService] IncreaseLevel called for {ability} but no config found.");
+                return;
+            }
+
+            var maxIndex = (config.Levels == null || config.Levels.Count == 0) ? 0 : config.Levels.Count - 1;
+            var current = GetLevelIndex(ability);
+            var next = current < maxIndex ? current + 1 : maxIndex;
+            _levels[ability] = next;
+            GameLogger.Log($"[GlobalAbilityService] {ability} level increased: {current} -> {next}");
+        }
+
+        private int GetLevelIndex(GlobalAbility ability)
+        {
+            if (_levels.TryGetValue(ability, out var idx))
+                return idx;
+            return 0;
         }
 
         private static GlobalAbilityLevel BuildLevel(GlobalAbilityConfig config, int levelIndex)

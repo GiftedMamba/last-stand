@@ -6,5 +6,6 @@ namespace Game.Gameplay.Abilities
     {
         void Trigger(GlobalAbility ability);
         GlobalAbilityLevel GetCurrentLevel(GlobalAbility ability);
+        void IncreaseLevel(GlobalAbility ability);
     }
 }

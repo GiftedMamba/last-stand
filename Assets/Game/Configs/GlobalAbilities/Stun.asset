@@ -19,4 +19,19 @@ MonoBehaviour:
     _damage: 50
     _isPercent: 0
     _splash: 0
+  - _cooldown: 19
+    _duration: 5
+    _damage: 60
+    _isPercent: 0
+    _splash: 0
+  - _cooldown: 18
+    _duration: 5
+    _damage: 70
+    _isPercent: 0
+    _splash: 0
+  - _cooldown: 17
+    _duration: 5
+    _damage: 70
+    _isPercent: 0
+    _splash: 0
   _vfxPrefab: {fileID: 0}

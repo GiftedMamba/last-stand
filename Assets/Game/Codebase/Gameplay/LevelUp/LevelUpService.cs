@@ -2,6 +2,9 @@
 using Game.Core.Player;
 using Game.UI.Screens;
 using VContainer.Unity;
+using Game.Configs;
+using Game.Gameplay.Abilities;
+using UnityEngine;
 
 namespace Game.Gameplay.LevelUp
 {
@@ -13,11 +16,15 @@ namespace Game.Gameplay.LevelUp
     {
         private readonly IScreenService _screenService;
         private readonly IPlayerLevelService _playerLevelService;
+        private readonly GlobalAbilityCatalog _catalog;
+        private readonly IGlobalAbilityService _abilityService;
 
-        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService)
+        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService, GlobalAbilityCatalog catalog, IGlobalAbilityService abilityService)
         {
             _screenService = screenService;
             _playerLevelService = playerLevelService;
+            _catalog = catalog;
+            _abilityService = abilityService;
         }
 
         public void Start()
@@ -47,7 +54,42 @@ namespace Game.Gameplay.LevelUp
                     GameLogger.LogError("LevelUpService: IScreenService is not available. Cannot show LevelUpScreen.");
                     return;
                 }
-                _screenService.Show("LevelUpScreen");
+                var instance = _screenService.Show("LevelUpScreen");
+                if (instance == null)
+                    return;
+
+                // Choose a random ability from available catalog entries
+                var configs = _catalog != null ? _catalog.Configs : null;
+                GlobalAbility chosen = Game.Gameplay.Abilities.GlobalAbility.Stun;
+                if (configs != null && configs.Count > 0)
+                {
+                    int idx = Random.Range(0, configs.Count);
+                    var cfg = configs[idx];
+                    if (cfg != null)
+                        chosen = cfg.Ability;
+                }
+
+                // Find or attach the increase-level button and initialize it
+                var inc = instance.GetComponentInChildren<UIIncreaseLevelButton>(true);
+                if (inc == null)
+                {
+                    // Try to find a Button in children to attach the component to
+                    var anyButton = instance.GetComponentInChildren<UnityEngine.UI.Button>(true);
+                    if (anyButton != null)
+                    {
+                        inc = anyButton.gameObject.AddComponent<UIIncreaseLevelButton>();
+                    }
+                    else
+                    {
+                        // As a last resort, attach to the root (will add a Button in Awake if missing)
+                        inc = instance.AddComponent<UIIncreaseLevelButton>();
+                    }
+                }
+
+                if (inc != null)
+                {
+                    inc.Init(chosen, _abilityService);
+                }
             }
         }
     }

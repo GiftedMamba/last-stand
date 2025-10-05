@@ -16,6 +16,21 @@ MonoBehaviour:
   _levels:
   - _cooldown: 20
     _duration: 5
+    _damage: 25
+    _isPercent: 1
+    _splash: 0
+  - _cooldown: 20
+    _duration: 5
+    _damage: 50
+    _isPercent: 1
+    _splash: 0
+  - _cooldown: 20
+    _duration: 5
+    _damage: 75
+    _isPercent: 1
+    _splash: 0
+  - _cooldown: 20
+    _duration: 5
     _damage: 100
     _isPercent: 1
     _splash: 0
