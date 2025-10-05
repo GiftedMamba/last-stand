@@ -19,6 +19,7 @@ namespace Game.Scopes
         [SerializeField] private UIRoot _uiRoot;
         [SerializeField] private GlobalAbilityCatalog _globalAbilityCatalog;
         [SerializeField] private WaveConfig _waveConfig;
+        [SerializeField] private EnemyConfigCatalog _enemyConfigCatalog;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -30,49 +31,53 @@ namespace Game.Scopes
             }
             else
             {
-                // Register ScreenService with UIRoot
                 builder.RegisterInstance<IScreenService>(new ScreenService(_uiRoot.Root));
             }
 
-            // Global Abilities wiring
             if (_globalAbilityCatalog == null)
             {
                 Game.Core.GameLogger.LogError("GameplayScope: GlobalAbilityCatalog is not assigned. Global abilities will still log but without config data.");
             }
             else
             {
-                // Make catalog available for constructor injection
                 builder.RegisterInstance(_globalAbilityCatalog);
             }
             
-            // Register executor from scene hierarchy (needs EnemyRegistry reference)
             builder.RegisterComponentInHierarchy<GlobalAbilityExecutor>().As<IGlobalAbilityExecutor>();
-            // Register ability service as a global singleton
             builder.Register<IGlobalAbilityService, GlobalAbilityService>(Lifetime.Singleton);
 
-            // Register CameraShake from hierarchy so it can be injected where needed
             builder.RegisterComponentInHierarchy<CameraShake>();
 
-            // Ensure scene components with [Inject] receive dependencies
             builder.RegisterComponentInHierarchy<GameOverController>();
             builder.RegisterComponentInHierarchy<Game.UI.GlobalAbilityButton>();
 
-            // Level up screen trigger as an entry point service
-            builder.RegisterEntryPoint<LevelUpService>();
+            // Level up service as entry point singleton
+            builder.RegisterEntryPoint<LevelUpService>(Lifetime.Singleton);
 
             // Wave system
             if (_waveConfig != null)
             {
                 builder.RegisterInstance(_waveConfig);
-                builder.Register<WaveService>(Lifetime.Singleton).As<IWaveService>().AsSelf();
-                builder.RegisterEntryPoint<WaveService>();
+                builder
+                    .RegisterEntryPoint<WaveService>(Lifetime.Singleton)
+                    .As<IWaveService>()
+                    .AsSelf();
             }
             else
             {
                 Game.Core.GameLogger.LogWarning("GameplayScope: WaveConfig is not assigned. WaveService will not be registered.");
             }
 
-            // Allow EnemySpawner to receive IObjectResolver for DI instantiation of enemies
+            // Enemy Config Catalog / Provider
+            if (_enemyConfigCatalog != null)
+            {
+                builder.RegisterInstance(_enemyConfigCatalog).As<IEnemyConfigProvider>();
+            }
+            else
+            {
+                Game.Core.GameLogger.LogError("GameplayScope: EnemyConfigCatalog is not assigned. Spawners will not be able to spawn enemies.");
+            }
+
             builder.RegisterComponentInHierarchy<EnemySpawner>();
         }
     }

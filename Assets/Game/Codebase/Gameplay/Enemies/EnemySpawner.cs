@@ -16,9 +16,6 @@ namespace Game.Gameplay.Enemies
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
-        [Header("Configs (assign in Inspector)")]
-        [SerializeField] private List<EnemyConfig> _enemyConfigs = new();
-
         [Header("Options")]
         [SerializeField] private bool _autoSpawnOnStart = false;
         [SerializeField, Min(0)] private int _autoConfigIndex = 0;
@@ -30,24 +27,17 @@ namespace Game.Gameplay.Enemies
         [SerializeField, Min(0.1f)] private float _delaySeconds = 2f;
         [SerializeField, Min(0f)] private float _timeDisplacement = 0f; // per-spawner offset range [0..timeDisplacement]
 
-        [Header("Waves (optional)")]
-        [SerializeField] private bool _useWaveConfig = false;
-        [SerializeField] private WaveConfig _waveConfig;
-        [SerializeField, Min(0.1f)] private float _waveSpawnDelay = 2f;
-
         [Header("Runtime References")]
         [SerializeField] private EnemyRegistry _enemyRegistry;
 
         private Coroutine _loopCoroutine;
-        private Coroutine _wavesCoroutine;
         private Coroutine _waveServiceCoroutine;
         private bool _stopped;
         private float _desyncOffset; // computed once per spawner
 
-        private System.Collections.Generic.Dictionary<EnemyType, System.Collections.Generic.List<EnemyConfig>> _configsByType;
-
         private IObjectResolver _resolver;
         private IWaveService _waveService;
+        private IEnemyConfigProvider _configProvider;
 
         [Inject]
         public void Construct(IObjectResolver resolver)
@@ -59,6 +49,12 @@ namespace Game.Gameplay.Enemies
         public void SetWaveService(Game.Gameplay.Waves.IWaveService waveService)
         {
             _waveService = waveService;
+        }
+
+        [Inject]
+        public void SetConfigProvider(IEnemyConfigProvider provider)
+        {
+            _configProvider = provider;
         }
 
          private void OnEnable()
@@ -82,20 +78,13 @@ namespace Game.Gameplay.Enemies
                 return;
             }
 
-            // Build type map for fast lookup in any mode
-            BuildTypeMap();
+            // compute per-spawner offset once to desync spawners
+            _desyncOffset = _timeDisplacement > 0f ? Random.Range(0f, _timeDisplacement) : 0f;
 
             // Centralized WaveService takes precedence if available
             if (_waveService != null && !_waveService.IsFinished)
             {
                 _waveServiceCoroutine = StartCoroutine(SpawnWithWaveService());
-                return;
-            }
-
-            // Legacy per-spawner WaveConfig mode
-            if (_useWaveConfig && _waveConfig != null && _waveConfig.Waves != null && _waveConfig.Waves.Count > 0)
-            {
-                _wavesCoroutine = StartCoroutine(SpawnWavesLoop());
                 return;
             }
 
@@ -106,8 +95,6 @@ namespace Game.Gameplay.Enemies
 
             if (_spawnRandomLoop)
             {
-                // compute per-spawner offset once to desync spawners without delaying the very first spawn
-                _desyncOffset = _timeDisplacement > 0f ? Random.Range(0f, _timeDisplacement) : 0f;
                 _loopCoroutine = StartCoroutine(SpawnRandomLoop());
             }
         }
@@ -119,11 +106,6 @@ namespace Game.Gameplay.Enemies
             {
                 StopCoroutine(_loopCoroutine);
                 _loopCoroutine = null;
-            }
-            if (_wavesCoroutine != null)
-            {
-                StopCoroutine(_wavesCoroutine);
-                _wavesCoroutine = null;
             }
             if (_waveServiceCoroutine != null)
             {
@@ -140,11 +122,6 @@ namespace Game.Gameplay.Enemies
                 StopCoroutine(_loopCoroutine);
                 _loopCoroutine = null;
             }
-            if (_wavesCoroutine != null)
-            {
-                StopCoroutine(_wavesCoroutine);
-                _wavesCoroutine = null;
-            }
             if (_waveServiceCoroutine != null)
             {
                 StopCoroutine(_waveServiceCoroutine);
@@ -155,16 +132,20 @@ namespace Game.Gameplay.Enemies
         public void SpawnAuto()
         {
             if (_stopped) return;
-            if (_enemyConfigs.Count == 0)
+            if (_configProvider == null)
             {
-                GameLogger.LogWarning("EnemySpawner: No enemy configs assigned.");
+                GameLogger.LogError("EnemySpawner: No IEnemyConfigProvider available. Assign EnemyConfigCatalog in GameplayScope.");
                 return;
             }
 
-            int idx = Mathf.Clamp(_autoConfigIndex, 0, _enemyConfigs.Count - 1);
-            var cfg = _enemyConfigs[idx];
             for (int i = 0; i < _autoCount; i++)
             {
+                var cfg = _configProvider.GetRandomAny();
+                if (cfg == null)
+                {
+                    GameLogger.LogWarning("EnemySpawner: ConfigProvider returned null config; aborting auto spawn.");
+                    break;
+                }
                 Vector3 pos = transform.position;
                 if (_spawnRadius > 0f)
                 {
@@ -177,9 +158,9 @@ namespace Game.Gameplay.Enemies
 
         private IEnumerator SpawnRandomLoop()
         {
-            if (_enemyConfigs.Count == 0)
+            if (_configProvider == null)
             {
-                GameLogger.LogWarning("EnemySpawner: No enemy configs assigned for random loop.");
+                GameLogger.LogError("EnemySpawner: No IEnemyConfigProvider available for random loop.");
                 yield break;
             }
 
@@ -194,8 +175,7 @@ namespace Game.Gameplay.Enemies
             // First spawn after desync delay
             if (!_stopped)
             {
-                int firstIdx = Random.Range(0, _enemyConfigs.Count);
-                var firstCfg = _enemyConfigs[firstIdx];
+                var firstCfg = _configProvider.GetRandomAny();
                 if (firstCfg != null)
                 {
                     Vector3 firstPos = transform.position;
@@ -214,13 +194,8 @@ namespace Game.Gameplay.Enemies
                 float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
                 yield return new WaitForSeconds(wait);
 
-                int idx = Random.Range(0, _enemyConfigs.Count);
-                var cfg = _enemyConfigs[idx];
-                if (cfg == null)
-                {
-                    GameLogger.LogWarning("EnemySpawner: Encountered null EnemyConfig in list; skipping.");
-                }
-                else
+                var cfg = _configProvider.GetRandomAny();
+                if (cfg != null)
                 {
                     Vector3 pos = transform.position;
                     if (_spawnRadius > 0f)
@@ -233,145 +208,49 @@ namespace Game.Gameplay.Enemies
             }
         }
 
-        private void BuildTypeMap()
-        {
-            if (_configsByType == null)
-                _configsByType = new System.Collections.Generic.Dictionary<EnemyType, System.Collections.Generic.List<EnemyConfig>>();
-            else
-                _configsByType.Clear();
-
-            if (_enemyConfigs == null) return;
-
-            foreach (var cfg in _enemyConfigs)
-            {
-                if (cfg == null) continue;
-                var type = cfg.Type;
-                if (!_configsByType.TryGetValue(type, out var list))
-                {
-                    list = new System.Collections.Generic.List<EnemyConfig>();
-                    _configsByType[type] = list;
-                }
-                list.Add(cfg);
-            }
-        }
-
-        private EnemyConfig GetRandomConfigForTypes(System.Collections.Generic.IReadOnlyList<EnemyType> types)
-        {
-            if (types == null || types.Count == 0 || _configsByType == null) return null;
-
-            // Try a few random attempts
-            int attempts = types.Count;
-            for (int i = 0; i < attempts; i++)
-            {
-                var t = types[Random.Range(0, types.Count)];
-                if (_configsByType.TryGetValue(t, out var list) && list != null && list.Count > 0)
-                {
-                    return list[Random.Range(0, list.Count)];
-                }
-            }
-
-            // Fallback deterministic scan
-            foreach (var t in types)
-            {
-                if (_configsByType.TryGetValue(t, out var list) && list != null && list.Count > 0)
-                {
-                    return list[0];
-                }
-            }
-
-            GameLogger.LogWarning("EnemySpawner: No EnemyConfig matches any of the wave's EnemyTypes.");
-            return null;
-        }
-
-        private IEnumerator SpawnWavesLoop()
-        {
-            var waves = _waveConfig != null ? _waveConfig.Waves : null;
-            if (waves == null || waves.Count == 0)
-            {
-                GameLogger.LogWarning("EnemySpawner: Wave mode enabled but WaveConfig has no waves.");
-                yield break;
-            }
-
-            for (int i = 0; i < waves.Count && !_stopped; i++)
-            {
-                var wave = waves[i];
-                float duration = Mathf.Max(0.01f, wave.Time);
-                float elapsed = 0f;
-
-                var types = (System.Collections.Generic.IReadOnlyList<EnemyType>)wave.EnemyTypes;
-
-                float delay = Mathf.Max(0.01f, _waveSpawnDelay);
-                float spawnTimer = 0f; // spawn immediately on first tick
-
-                while (!_stopped && elapsed < duration)
-                {
-                    if (spawnTimer <= 0f)
-                    {
-                        var cfg = GetRandomConfigForTypes(types);
-                        if (cfg != null)
-                        {
-                            Vector3 pos = transform.position;
-                            if (_spawnRadius > 0f)
-                            {
-                                var offset = Random.insideUnitCircle * _spawnRadius;
-                                pos += new Vector3(offset.x, 0f, offset.y);
-                            }
-                            Spawn(cfg, pos, transform.rotation);
-                        }
-                        spawnTimer = delay;
-                    }
-
-                    yield return null;
-                    float dt = Time.deltaTime;
-                    elapsed += dt;
-                    spawnTimer -= dt;
-                }
-                // Wave finished: stop spawning for this wave and move to next
-            }
-
-            if (!_stopped)
-            {
-                GameLogger.Log("You win!");
-            }
-
-            _wavesCoroutine = null;
-        }
 
         private IEnumerator SpawnWithWaveService()
         {
-            float delay = Mathf.Max(0.01f, _waveSpawnDelay);
-            float spawnTimer = 0f; // allow immediate spawn when wave provides types
+            if (_configProvider == null)
+            {
+                GameLogger.LogError("EnemySpawner: No IEnemyConfigProvider available for wave service spawning.");
+                yield break;
+            }
+
+            // Initial desync
+            if (!_stopped)
+            {
+                float upper = Mathf.Max(0.1f, _timeDisplacement);
+                float initialDelay = Random.Range(0.1f, upper);
+                yield return new WaitForSeconds(initialDelay);
+            }
 
             while (!_stopped && _waveService != null && !_waveService.IsFinished)
             {
                 var types = _waveService.AllowedTypes;
                 if (types != null && types.Count > 0)
                 {
-                    if (spawnTimer <= 0f)
+                    var cfg = _configProvider.GetRandomForTypes(types);
+                    if (cfg != null)
                     {
-                        var cfg = GetRandomConfigForTypes(types);
-                        if (cfg != null)
+                        Vector3 pos = transform.position;
+                        if (_spawnRadius > 0f)
                         {
-                            Vector3 pos = transform.position;
-                            if (_spawnRadius > 0f)
-                            {
-                                var offset = Random.insideUnitCircle * _spawnRadius;
-                                pos += new UnityEngine.Vector3(offset.x, 0f, offset.y);
-                            }
-                            Spawn(cfg, pos, transform.rotation);
+                            var offset = Random.insideUnitCircle * _spawnRadius;
+                            pos += new Vector3(offset.x, 0f, offset.y);
                         }
-                        spawnTimer = delay;
+                        Spawn(cfg, pos, transform.rotation);
                     }
+
+                    // wait for pacing delay
+                    float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
+                    yield return new WaitForSeconds(wait);
                 }
                 else
                 {
-                    // No allowed types right now; reset timer so we spawn immediately when types appear
-                    spawnTimer = 0f;
+                    // no allowed types right now, try next frame
+                    yield return null;
                 }
-
-                yield return null;
-                float dt = Time.deltaTime;
-                spawnTimer -= dt;
             }
 
             _waveServiceCoroutine = null;
