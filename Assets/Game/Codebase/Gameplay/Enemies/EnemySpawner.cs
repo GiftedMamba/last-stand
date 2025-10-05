@@ -34,6 +34,7 @@ namespace Game.Gameplay.Enemies
         private Coroutine _waveServiceCoroutine;
         private bool _stopped;
         private float _desyncOffset; // computed once per spawner
+        private string _lastMissingTypesSignature; // to avoid spamming identical warnings
 
         private IObjectResolver _resolver;
         private IWaveService _waveService;
@@ -65,39 +66,52 @@ namespace Game.Gameplay.Enemies
          private void Start()
          {
             // Fallback: if DI didn't run, try to grab a resolver from nearest LifetimeScope
-            if (_resolver == null)
-            {
-                var scope = GetComponentInParent<VContainer.Unity.LifetimeScope>();
-                if (scope != null)
-                    _resolver = scope.Container;
-            }
+             if (_resolver == null)
+             {
+                 var scope = GetComponentInParent<VContainer.Unity.LifetimeScope>();
+                 if (scope != null)
+                     _resolver = scope.Container;
+             }
 
-            if (GameOverController.IsGameOver)
-            {
-                _stopped = true;
-                return;
-            }
+             // Try to resolve WaveService if not injected (e.g., multiple spawners in scene before DI)
+             if (_waveService == null && _resolver != null)
+             {
+                 try
+                 {
+                     _waveService = _resolver.Resolve<Game.Gameplay.Waves.IWaveService>();
+                 }
+                 catch
+                 {
+                     // ignore: service may not be registered (no wave config)
+                 }
+             }
 
-            // compute per-spawner offset once to desync spawners
-            _desyncOffset = _timeDisplacement > 0f ? Random.Range(0f, _timeDisplacement) : 0f;
+             if (GameOverController.IsGameOver)
+             {
+                 _stopped = true;
+                 return;
+             }
 
-            // Centralized WaveService takes precedence if available
-            if (_waveService != null && !_waveService.IsFinished)
-            {
-                _waveServiceCoroutine = StartCoroutine(SpawnWithWaveService());
-                return;
-            }
+             // compute per-spawner offset once to desync spawners
+             _desyncOffset = _timeDisplacement > 0f ? Random.Range(0f, _timeDisplacement) : 0f;
 
-            if (_autoSpawnOnStart)
-            {
-                SpawnAuto();
-            }
+             // Centralized WaveService takes precedence if available
+             if (_waveService != null && !_waveService.IsFinished)
+             {
+                 _waveServiceCoroutine = StartCoroutine(SpawnWithWaveService());
+                 return;
+             }
 
-            if (_spawnRandomLoop)
-            {
-                _loopCoroutine = StartCoroutine(SpawnRandomLoop());
-            }
-        }
+             if (_autoSpawnOnStart)
+             {
+                 SpawnAuto();
+             }
+
+             if (_spawnRandomLoop)
+             {
+                 _loopCoroutine = StartCoroutine(SpawnRandomLoop());
+             }
+         }
 
         private void OnDisable()
         {
@@ -241,6 +255,89 @@ namespace Game.Gameplay.Enemies
                         }
                         Spawn(cfg, pos, transform.rotation);
                     }
+                    else
+                    {
+                        // Build a stable signature of allowed types to avoid log spam
+                        string signature;
+                        if (types != null && types.Count > 0)
+                        {
+                            // Sort copy for deterministic signature
+                            var copy = new List<Game.Gameplay.Enemies.EnemyType>(types);
+                            copy.Sort();
+                            signature = string.Join(",", copy);
+                        }
+                        else signature = string.Empty;
+
+                        if (_lastMissingTypesSignature != signature)
+                        {
+                            _lastMissingTypesSignature = signature;
+
+                            // Probe which types are missing configs to help authoring
+                            var missing = new List<Game.Gameplay.Enemies.EnemyType>();
+                            if (types != null)
+                            {
+                                for (int i = 0; i < types.Count; i++)
+                                {
+                                    var t = types[i];
+                                    if (_configProvider.GetRandomForType(t) == null)
+                                        missing.Add(t);
+                                }
+                            }
+
+                            if (missing.Count > 0)
+                            {
+                                Game.Core.GameLogger.LogWarning($"EnemySpawner: No configs found for current wave's allowed types. Missing in catalog: {string.Join(", ", missing)}. Skipping spawn this tick.");
+
+                                // Additionally, log all types currently available in the catalog to aid setup
+                                var available = new System.Collections.Generic.List<Game.Gameplay.Enemies.EnemyType>();
+                                var values = System.Enum.GetValues(typeof(Game.Gameplay.Enemies.EnemyType));
+                                foreach (var v in values)
+                                {
+                                    var et = (Game.Gameplay.Enemies.EnemyType)v;
+                                    if (et == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
+                                    if (_configProvider.GetRandomForType(et) != null)
+                                    {
+                                        available.Add(et);
+                                    }
+                                }
+                                if (available.Count > 0)
+                                {
+                                    Game.Core.GameLogger.Log($"EnemySpawner: Available types in catalog: {string.Join(", ", available)}");
+                                }
+                                else
+                                {
+                                    Game.Core.GameLogger.Log("EnemySpawner: Available types in catalog: <none>");
+                                }
+                            }
+                            else
+                            {
+                                // This should rarely happen, but keep previous message as fallback
+                                Game.Core.GameLogger.LogWarning("EnemySpawner: No configs found for current wave's allowed types. Skipping spawn this tick.");
+
+                                // Additionally, log available catalog types for diagnostics
+                                var available = new System.Collections.Generic.List<Game.Gameplay.Enemies.EnemyType>();
+                                var values = System.Enum.GetValues(typeof(Game.Gameplay.Enemies.EnemyType));
+                                foreach (var v in values)
+                                {
+                                    var et = (Game.Gameplay.Enemies.EnemyType)v;
+                                    if (et == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
+                                    if (_configProvider.GetRandomForType(et) != null)
+                                    {
+                                        available.Add(et);
+                                    }
+                                }
+                                if (available.Count > 0)
+                                {
+                                    Game.Core.GameLogger.Log($"EnemySpawner: Available types in catalog: {string.Join(", ", available)}");
+                                }
+                                else
+                                {
+                                    Game.Core.GameLogger.Log("EnemySpawner: Available types in catalog: <none>");
+                                }
+                            }
+                        }
+                        // else: same signature as before, skip repeated warning this frame
+                    }
 
                     // wait for pacing delay
                     float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
@@ -261,9 +358,14 @@ namespace Game.Gameplay.Enemies
         public Enemy Spawn(EnemyConfig config, Vector3 position, Quaternion rotation)
         {
             if (_stopped) return null;
-            if (config == null || config.EnemyPrefab == null)
+            if (config == null)
             {
-                GameLogger.LogError("EnemySpawner: Config or prefab is null.");
+                GameLogger.LogError("EnemySpawner: Config is null.");
+                return null;
+            }
+            if (config.EnemyPrefab == null)
+            {
+                GameLogger.LogError($"EnemySpawner: EnemyPrefab is null for config '{config.name}' (Type={config.Type}).");
                 return null;
             }
 

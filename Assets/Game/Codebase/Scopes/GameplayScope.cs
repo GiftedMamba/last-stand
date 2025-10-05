@@ -73,6 +73,40 @@ namespace Game.Scopes
             if (_enemyConfigCatalog != null)
             {
                 builder.RegisterInstance(_enemyConfigCatalog).As<IEnemyConfigProvider>();
+
+                // Diagnostics: log available enemy config types and which have prefabs assigned
+                try
+                {
+                    var configs = _enemyConfigCatalog.Configs;
+                    int count = configs != null ? configs.Count : 0;
+
+                    var presentTypes = new System.Collections.Generic.HashSet<Game.Gameplay.Enemies.EnemyType>();
+                    var prefabTypes = new System.Collections.Generic.HashSet<Game.Gameplay.Enemies.EnemyType>();
+
+                    if (configs != null)
+                    {
+                        for (int i = 0; i < configs.Count; i++)
+                        {
+                            var cfg = configs[i];
+                            if (cfg == null) continue;
+                            var t = cfg.Type;
+                            if (t == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
+                            presentTypes.Add(t);
+                            if (cfg.EnemyPrefab != null)
+                                prefabTypes.Add(t);
+                        }
+                    }
+
+                    string presentStr = presentTypes.Count > 0
+                        ? string.Join(", ", presentTypes)
+                        : "<none>";
+                    string prefabStr = prefabTypes.Count > 0
+                        ? string.Join(", ", prefabTypes)
+                        : "<none>";
+
+                    Game.Core.GameLogger.Log($"GameplayScope: EnemyConfigCatalog registered. Config count={count}. Types present: {presentStr}. Types with prefab: {prefabStr}.");
+                }
+                catch { /* ignore logging exceptions */ }
             }
             else
             {

@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc609e64e0b64baaa459548a7e583b3f, type: 3}
-  m_Name: EnemyConfigCatalog
+  m_Name: _EnemyConfigCatalog
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfigCatalog
   _configs:
   - {fileID: 11400000, guid: be6d14c2deec22f48afc695e8645c34b, type: 2}

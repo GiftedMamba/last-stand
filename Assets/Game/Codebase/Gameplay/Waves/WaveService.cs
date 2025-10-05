@@ -118,8 +118,29 @@ namespace Game.Gameplay.Waves
                 var list = waves[index].EnemyTypes;
                 if (list != null && list.Count > 0)
                 {
-                    _allowedTypes.AddRange(list);
+                    // Only use explicitly specified enemy types for this wave; ignore Unknown and duplicates
+                    var seen = new System.Collections.Generic.HashSet<Game.Gameplay.Enemies.EnemyType>();
+                    foreach (var t in list)
+                    {
+                        if (t == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
+                        if (seen.Add(t))
+                            _allowedTypes.Add(t);
+                    }
                 }
+            }
+
+            // Diagnostics to help verify allowed types in Editor
+            if (_allowedTypes.Count > 0)
+            {
+                try
+                {
+                    GameLogger.Log($"WaveService: Entered wave {index}. Allowed: {string.Join(", ", _allowedTypes)}");
+                }
+                catch { /* ignore formatting issues */ }
+            }
+            else
+            {
+                GameLogger.LogWarning($"WaveService: Entered wave {index} but no allowed enemy types are configured.");
             }
         }
 
