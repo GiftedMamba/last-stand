@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Boss Goblin
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 0}
+  _type: 10
   _maxHp: 1600
   _armor: 6
   _moveSpeed: 2.2
   _dpsToSpot: 25
+  _explodeDamageToTower: 10
   _isBoss: 1
+  _xpReward: 1
+  _aimPointYOffset: 1

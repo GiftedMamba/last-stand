@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Shaman Goblin
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 0}
+  _type: 7
   _maxHp: 180
   _armor: 1
   _moveSpeed: 2.3
   _dpsToSpot: 6
+  _explodeDamageToTower: 10
   _isBoss: 0
+  _xpReward: 1
+  _aimPointYOffset: 1

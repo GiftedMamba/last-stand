@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Goblin Warrior
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 0}
+  _type: 6
   _maxHp: 220
   _armor: 2
   _moveSpeed: 2.4
   _dpsToSpot: 11
+  _explodeDamageToTower: 10
   _isBoss: 0
+  _xpReward: 1
+  _aimPointYOffset: 1

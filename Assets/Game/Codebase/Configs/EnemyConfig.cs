@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Game.Gameplay.Enemies;
 
 namespace Game.Configs
 {
@@ -13,6 +14,10 @@ namespace Game.Configs
         [SerializeField] private GameObject _enemyPrefab;
         [Tooltip("Prefab to spawn when this enemy explodes on a tower (e.g., VFX/SFX container). Optional.")]
         [SerializeField] private GameObject _explosionPrefab;
+
+        [Header("Identity")]
+        [Tooltip("High-level enemy classification for logic and UI.")]
+        [SerializeField] private EnemyType _type = EnemyType.Unknown;
 
         [Header("Stats (from GDD)")]
         [SerializeField, Min(1)] private int _maxHp = 100;
@@ -32,6 +37,7 @@ namespace Game.Configs
 
         public GameObject EnemyPrefab => _enemyPrefab;
         public GameObject ExplosionPrefab => _explosionPrefab;
+        public EnemyType Type => _type;
         public int MaxHp => _maxHp;
         public int Armor => _armor;
         public float MoveSpeed => _moveSpeed;

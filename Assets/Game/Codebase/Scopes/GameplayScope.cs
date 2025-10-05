@@ -9,6 +9,7 @@ using Game.Gameplay.Abilities;
 using Game.Presentation.Camera;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.LevelUp;
+using Game.Gameplay.Waves;
 
 namespace Game.Scopes
 {
@@ -17,6 +18,7 @@ namespace Game.Scopes
         [Header("Scene References")]
         [SerializeField] private UIRoot _uiRoot;
         [SerializeField] private GlobalAbilityCatalog _globalAbilityCatalog;
+        [SerializeField] private WaveConfig _waveConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -57,6 +59,18 @@ namespace Game.Scopes
 
             // Level up screen trigger as an entry point service
             builder.RegisterEntryPoint<LevelUpService>();
+
+            // Wave system
+            if (_waveConfig != null)
+            {
+                builder.RegisterInstance(_waveConfig);
+                builder.Register<WaveService>(Lifetime.Singleton).As<IWaveService>().AsSelf();
+                builder.RegisterEntryPoint<WaveService>();
+            }
+            else
+            {
+                Game.Core.GameLogger.LogWarning("GameplayScope: WaveConfig is not assigned. WaveService will not be registered.");
+            }
 
             // Allow EnemySpawner to receive IObjectResolver for DI instantiation of enemies
             builder.RegisterComponentInHierarchy<EnemySpawner>();

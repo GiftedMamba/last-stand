@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Big Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 0}
+  _type: 5
   _maxHp: 240
   _armor: 2
   _moveSpeed: 2
   _dpsToSpot: 10
+  _explodeDamageToTower: 10
   _isBoss: 0
+  _xpReward: 1
+  _aimPointYOffset: 1

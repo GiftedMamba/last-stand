@@ -32,6 +32,7 @@ namespace Game.Gameplay.Enemies
         public int MaxHp => _config != null ? Mathf.Max(1, _config.MaxHp) : Mathf.Max(1, _currentHp);
         public bool IsDead => _currentHp <= 0;
         public int Armor => _armor;
+        public EnemyType Type => _config != null ? _config.Type : EnemyType.Unknown;
 
         // External damage taken multiplier (e.g., Howl); 1.0 means no change
         private float _externalDamageTakenMultiplier = 1f;

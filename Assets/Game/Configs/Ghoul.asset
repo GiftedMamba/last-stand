@@ -13,8 +13,13 @@ MonoBehaviour:
   m_Name: Ghoul
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 0}
+  _type: 1
   _maxHp: 120
   _armor: 0
   _moveSpeed: 2.8
   _dpsToSpot: 9
+  _explodeDamageToTower: 10
   _isBoss: 0
+  _xpReward: 1
+  _aimPointYOffset: 1

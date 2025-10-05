@@ -4301,6 +4301,9 @@ MonoBehaviour:
   _spawnRandomLoop: 1
   _delaySeconds: 5
   _timeDisplacement: 1.5
+  _useWaveConfig: 0
+  _waveConfig: {fileID: 0}
+  _waveSpawnDelay: 2
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &711211743
 Transform:
@@ -11504,6 +11507,7 @@ MonoBehaviour:
   - {fileID: 1763668744}
   _uiRoot: {fileID: 277656203}
   _globalAbilityCatalog: {fileID: 11400000, guid: bb4f4a7a1e23b1046a41177daa94acf0, type: 2}
+  _waveConfig: {fileID: 11400000, guid: a6e6663649d21284b9221d00979cb7fb, type: 2}
 --- !u!4 &1683796636
 Transform:
   m_ObjectHideFlags: 0
@@ -12066,6 +12070,9 @@ MonoBehaviour:
   _spawnRandomLoop: 1
   _delaySeconds: 5
   _timeDisplacement: 1.5
+  _useWaveConfig: 0
+  _waveConfig: {fileID: 0}
+  _waveSpawnDelay: 2
   _enemyRegistry: {fileID: 594568889}
 --- !u!1 &1763668744
 GameObject:
@@ -12896,6 +12903,9 @@ MonoBehaviour:
   _spawnRandomLoop: 1
   _delaySeconds: 5
   _timeDisplacement: 1.5
+  _useWaveConfig: 0
+  _waveConfig: {fileID: 0}
+  _waveSpawnDelay: 2
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &1903687902
 Transform:
