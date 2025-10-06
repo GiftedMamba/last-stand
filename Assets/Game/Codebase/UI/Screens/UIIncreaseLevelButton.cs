@@ -60,6 +60,13 @@ namespace Game.UI.Screens
                 return;
 
             _service.IncreaseLevel(_ability);
+
+            // After a successful selection/upgrade, close the LevelUp screen
+            var screen = GetComponentInParent<LevelUpScreenBehaviour>(true);
+            if (screen != null)
+            {
+                Destroy(screen.gameObject);
+            }
         }
 
         public void SetInteractable(bool interactable)
