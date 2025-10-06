@@ -2,6 +2,9 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using VContainer;
+using VContainer.Unity;
+using Game.Configs;
 
 namespace Game.UI.Screens
 {
@@ -14,11 +17,13 @@ namespace Game.UI.Screens
     {
         [Header("Bindings")]
         [SerializeField] private TextMeshProUGUI _label;
+        [SerializeField] private Image _iconImage; // assign in Inspector to display icon from config
 
         private Button _button;
         private IGlobalAbilityService _service;
         private GlobalAbility _ability;
         private bool _initialized;
+        private GlobalAbilityCatalog _catalog;
 
         private void Awake()
         {
@@ -31,6 +36,13 @@ namespace Game.UI.Screens
             if (_button != null)
             {
                 _button.onClick.AddListener(OnClicked);
+            }
+
+            // Try resolve catalog from nearest LifetimeScope (DI) so we can fetch icons
+            var scope = GetComponentInParent<LifetimeScope>();
+            if (scope != null)
+            {
+                scope.Container.TryResolve(out _catalog);
             }
         }
 
@@ -51,6 +63,18 @@ namespace Game.UI.Screens
             if (_label != null)
             {
                 _label.text = ability.ToString();
+            }
+
+            // Apply icon from config if bindings and catalog are available
+            if (_iconImage != null && _catalog != null)
+            {
+                var cfg = _catalog.Get(ability);
+                if (cfg != null && cfg.Icon != null)
+                {
+                    _iconImage.sprite = cfg.Icon;
+                    _iconImage.enabled = true;
+                    _iconImage.preserveAspect = true;
+                }
             }
         }
 

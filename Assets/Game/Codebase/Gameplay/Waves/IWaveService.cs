@@ -23,6 +23,11 @@ namespace Game.Gameplay.Waves
         int CurrentWaveNumber { get; }
 
         /// <summary>
+        /// Total number of waves configured. Returns 0 when there is no wave configuration.
+        /// </summary>
+        int TotalWaves { get; }
+
+        /// <summary>
         /// True when the last wave has completed.
         /// </summary>
         bool IsFinished { get; }

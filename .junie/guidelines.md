@@ -8,6 +8,8 @@ Project info located under .docs/gamedoc.md; If information in prompt conflicts 
 
 ALL SCRIPTS SHOULD BE INSIDE ASSETS/GAME/CODEBASE folder.
 DO NOT BUILD SOLUTION INSIDE RIDER
+IMPORTANT: ALL SERVICES SHOULD BE INJECTED VIA VCONTAINER THROUGH METHOD WITH INJECT ATTRIBUTE, NOT RESOLVED INSIDE CLASSES!!!
+
 Use assembly definitions for scripts to speed up compilation. At least core, gameplay and UI.
 
 ## 1. Build and Configuration

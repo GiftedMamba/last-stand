@@ -37,7 +37,8 @@ namespace Game.UI.Hud
             if (_waveNumberText != null)
             {
                 int waveNumber = _waveService != null ? _waveService.CurrentWaveNumber : 0;
-                _waveNumberText.text = waveNumber > 0 ? waveNumber.ToString() : "";
+                int totalWaves = _waveService != null ? _waveService.TotalWaves : 0;
+                _waveNumberText.text = (waveNumber > 0 && totalWaves > 0) ? ($"{waveNumber}/{totalWaves}") : "";
             }
         }
 
@@ -45,9 +46,7 @@ namespace Game.UI.Hud
         {
             if (seconds < 0f) seconds = 0f;
             int total = Mathf.RoundToInt(seconds);
-            int minutes = total / 60;
-            int secs = total % 60;
-            return string.Format("{0:00}:{1:00}", minutes, secs);
+            return total.ToString();
         }
     }
 }

@@ -60,6 +60,14 @@ namespace Game.Gameplay.Waves
                 return _currentWaveIndex + 1;
             }
         }
+        public int TotalWaves
+        {
+            get
+            {
+                var waves = _config?.Waves;
+                return waves != null ? waves.Count : 0;
+            }
+        }
         public event Action Finished;
 
         public void Start()
