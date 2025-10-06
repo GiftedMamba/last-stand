@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
 using Game.Gameplay.Enemies;
+using Game.Gameplay.GameOver;
+using Game.UI.Screens;
+using UnityEngine;
 using VContainer.Unity;
 
 namespace Game.Gameplay.Waves
@@ -14,6 +17,8 @@ namespace Game.Gameplay.Waves
     public sealed class WaveService : IWaveService, IStartable, ITickable
     {
         private readonly WaveConfig _config;
+        private readonly IScreenService _screenService;
+        private readonly GameOverController _gameOverController;
 
         private readonly List<EnemyType> _allowedTypes = new();
         private int _currentWaveIndex = -1;
@@ -22,9 +27,11 @@ namespace Game.Gameplay.Waves
         private bool _finished;
         private bool _loggedWin;
 
-        public WaveService(WaveConfig config)
+        public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController)
         {
             _config = config;
+            _screenService = screenService;
+            _gameOverController = gameOverController;
         }
 
         public IReadOnlyList<EnemyType> AllowedTypes => _allowedTypes;
@@ -151,8 +158,33 @@ namespace Game.Gameplay.Waves
             _allowedTypes.Clear();
             if (!_loggedWin)
             {
-                GameLogger.Log("You win!");
                 _loggedWin = true;
+                // Show Win Screen instead of just logging
+                if (_screenService != null)
+                {
+                    var instance = _screenService.Show("WinScreen");
+                    if (instance != null)
+                    {
+                        var win = instance.GetComponentInChildren<WinScreenBehaviour>(true);
+                        if (win != null)
+                        {
+                            int stars = 0;
+                            if (_gameOverController != null)
+                            {
+                                stars = Mathf.Max(0, _gameOverController.AliveTowersCount);
+                            }
+                            win.SetStarsCount(stars);
+                        }
+                        else
+                        {
+                            GameLogger.LogWarning("WaveService: WinScreen shown but WinScreenBehaviour not found. Stars will not be initialized.");
+                        }
+                    }
+                }
+                else
+                {
+                    GameLogger.LogWarning("WaveService: IScreenService not available. Cannot show WinScreen.");
+                }
             }
             try { Finished?.Invoke(); } catch { /* ignore */ }
         }

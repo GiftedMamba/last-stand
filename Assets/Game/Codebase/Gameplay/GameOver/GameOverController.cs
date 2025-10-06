@@ -34,6 +34,8 @@ namespace Game.Gameplay.GameOver
         private int _aliveCount;
         private bool _gameOverShown;
 
+        public int AliveTowersCount => _aliveCount;
+
         [Inject]
         public void Construct(IScreenService screenService)
         {

@@ -49,7 +49,7 @@ namespace Game.UI.Screens
             }
 
             // Pause the game while modal screens are shown
-            if (prefabName == "LevelUpScreen" || prefabName == "GameOverScreen")
+            if (prefabName == "LevelUpScreen" || prefabName == "GameOverScreen" || prefabName == "WinScreen")
             {
                 if (instance.GetComponent<ScreenPauseOnOpen>() == null)
                 {

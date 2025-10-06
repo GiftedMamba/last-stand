@@ -134,7 +134,8 @@ MonoBehaviour:
   _forwardDistance: 15
   _groundMask:
     serializedVersion: 2
-    m_Bits: 192
+    m_Bits: 64
+  _startFireDelay: 0
   _fireCooldown: 1
 --- !u!4 &6141855355188393244 stripped
 Transform:
