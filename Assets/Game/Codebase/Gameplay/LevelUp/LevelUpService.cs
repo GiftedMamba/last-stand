@@ -36,6 +36,12 @@ namespace Game.Gameplay.LevelUp
                 GameLogger.LogError("LevelUpService: IPlayerLevelService is not available.");
                 return;
             }
+
+            // New run start: reset player and abilities so defeat->restart clears progression
+            _playerLevelService.Reset();
+            _abilityService?.Reset();
+            _heroAbilityService?.Reset();
+
             _playerLevelService.LevelChanged += OnLevelChanged;
         }
 

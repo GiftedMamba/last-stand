@@ -116,6 +116,7 @@ namespace Game.Scopes
 
             // UI HUD
             builder.RegisterComponentInHierarchy<Hud>();
+            builder.RegisterComponentInHierarchy<LevelProgressView>();
 
             builder.RegisterComponentInHierarchy<EnemySpawner>();
             builder.RegisterComponentInHierarchy<Game.Gameplay.Player.PlayerSpawner>();

@@ -106,6 +106,24 @@ namespace Game.Gameplay.Abilities
             GameLogger.Log($"[GlobalAbilityService] {ability} level increased: {current} -> {next}");
         }
 
+        public void Reset()
+        {
+            // Reset all tracked abilities to level 0
+            if (_catalog != null && _catalog.Configs != null)
+            {
+                for (int i = 0; i < _catalog.Configs.Count; i++)
+                {
+                    var cfg = _catalog.Configs[i];
+                    if (cfg == null) continue;
+                    _levels[cfg.Ability] = 0;
+                }
+            }
+            else
+            {
+                _levels.Clear();
+            }
+        }
+
         private int GetLevelIndex(GlobalAbility ability)
         {
             if (_levels.TryGetValue(ability, out var idx))

@@ -80,5 +80,10 @@ namespace Game.Gameplay.Abilities
             // Ability not found in config => no upgrades defined
             return 0;
         }
+
+        public void Reset()
+        {
+            _levels.Clear();
+        }
     }
 }

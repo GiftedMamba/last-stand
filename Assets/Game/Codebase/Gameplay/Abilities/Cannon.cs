@@ -78,7 +78,7 @@ namespace Game.Gameplay.Abilities
             projTransform.localPosition = Vector3.zero;
             projTransform.localRotation = Quaternion.identity;
 
-            proj.Init(start, target, _arcHeight, _flightTime, onImpact);
+            proj.Init(start, target, _arcHeight, _flightTime, onImpact, _groundMask);
 
             // Set next ready time based on cooldown
             _nextReadyTime = Time.time + Mathf.Max(0f, _fireCooldown);

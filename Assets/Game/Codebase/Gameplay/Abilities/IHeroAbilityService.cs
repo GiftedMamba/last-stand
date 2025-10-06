@@ -13,5 +13,6 @@ namespace Game.Gameplay.Abilities
         int GetLevel(HeroAbilityType abilityType);
         void RegisterConfig(PlayerConfig playerConfig);
         bool CanIncrease(HeroAbilityType abilityType);
+        void Reset();
     }
 }
