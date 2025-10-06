@@ -347,6 +347,10 @@ namespace Game.Gameplay.Player
                 // For the central shot (0 deg), use the target snapshot; for side shots, fire forward without target snapshot
                 Enemy initTarget = angle == 0 ? target : null;
                 proj.Init(initTarget, speed, dmg, _hitRadius, pierceCount);
+                if (_config != null)
+                {
+                    proj.SetMaxLifetime(Mathf.Max(0f, _config.BaseProjectileLifetime));
+                }
             }
         }
     }

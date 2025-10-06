@@ -23,6 +23,14 @@ namespace Game.Gameplay.Combat
         private int _pierceCount; // how many enemies this projectile can pierce through
         private HashSet<Enemy> _hitEnemies; // tracks which enemies have been hit to avoid multiple hits
 
+        /// <summary>
+        /// Allows external systems (e.g., PlayerAttack) to override the maximum lifetime in seconds.
+        /// </summary>
+        public void SetMaxLifetime(float seconds)
+        {
+            _maxLifetime = Mathf.Max(0f, seconds);
+        }
+
         public void Init(Enemy target, float speed, float damage, float hitRadius = 0.2f, int pierceCount = 0)
         {
             _target = target;
