@@ -118,6 +118,7 @@ namespace Game.Scopes
             builder.RegisterComponentInHierarchy<Hud>();
 
             builder.RegisterComponentInHierarchy<EnemySpawner>();
+            builder.RegisterComponentInHierarchy<Game.Gameplay.Player.PlayerSpawner>();
         }
     }
 }

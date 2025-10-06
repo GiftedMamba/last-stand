@@ -5,6 +5,7 @@ using Game.Gameplay.Combat;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.Abilities;
 using UnityEngine;
+using VContainer;
 
 namespace Game.Gameplay.Player
 {
@@ -44,6 +45,15 @@ namespace Game.Gameplay.Player
         // Runtime ability levels tracked here (not in config). Missing entries default to 0.
         private readonly Dictionary<HeroAbilityType, int> _abilityLevels = new();
 
+        // Injected hero ability service (optional). When available, we read current levels from here.
+        private IHeroAbilityService _heroAbilityService;
+
+        [Inject]
+        public void Construct(IHeroAbilityService heroAbilityService)
+        {
+            _heroAbilityService = heroAbilityService;
+        }
+
         public void SetAbilityLevel(HeroAbilityType type, int level)
         {
             if (level < 0) level = 0;
@@ -52,8 +62,16 @@ namespace Game.Gameplay.Player
 
         public int GetAbilityLevel(HeroAbilityType type)
         {
-            if (_abilityLevels != null && _abilityLevels.TryGetValue(type, out var lvl))
+            // Prefer live levels from the injected service when available
+            if (_heroAbilityService != null)
+            {
+                int lvl = _heroAbilityService.GetLevel(type);
                 return lvl < 0 ? 0 : lvl;
+            }
+
+            // Fallback to local runtime dictionary
+            if (_abilityLevels != null && _abilityLevels.TryGetValue(type, out var localLvl))
+                return localLvl < 0 ? 0 : localLvl;
             return 0;
         }
 

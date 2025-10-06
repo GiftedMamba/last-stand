@@ -1,6 +1,8 @@
 ﻿using Game.Configs;
 using Game.Core;
 using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Player
 {
@@ -13,6 +15,14 @@ namespace Game.Gameplay.Player
     {
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private Game.Gameplay.Enemies.EnemyRegistry _enemyRegistry;
+
+        private IObjectResolver _resolver;
+
+        [Inject]
+        public void Construct(IObjectResolver resolver)
+        {
+            _resolver = resolver;
+        }
 
         private void Start()
         {
@@ -32,6 +42,12 @@ namespace Game.Gameplay.Player
             var prefab = _playerConfig.PlayerPrefab;
             var instance = Instantiate(prefab, transform.position, transform.rotation, transform);
             instance.name = prefab.name; // keep clean name without (Clone)
+
+            // Inject dependencies into the spawned hierarchy if resolver is available
+            if (_resolver != null)
+            {
+                _resolver.InjectGameObject(instance);
+            }
 
             // Try wire PlayerAttack
             var attack = instance.GetComponentInChildren<PlayerAttack>();
