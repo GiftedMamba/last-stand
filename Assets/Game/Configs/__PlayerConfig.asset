@@ -19,4 +19,7 @@ MonoBehaviour:
   _baseProjectileSpeed: 30
   _basePierceCount: 2
   _attackCount: 5
+  _abilities:
+  - _type: 1
+  - _type: 2
   _experienceToNextLevel: 64000000c80000002c01000090010000f401000058020000bc0200002003000084030000e8030000

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Game.Gameplay.Abilities;
 
 namespace Game.Configs
 {
@@ -22,6 +23,9 @@ namespace Game.Configs
         [SerializeField, Min(0)] private int _basePierceCount = 0; // how many enemies projectile can pierce through
         [SerializeField, Range(1,5)] private int _attackCount = 1; // number of simultaneous shots (1..5)
 
+        [Header("Abilities")]
+        [SerializeField] private List<HeroAbility> _abilities = new();
+
         [Header("Progression")]
         [Tooltip("Each entry is the experience required to reach the next level from the current level. Index 0 = XP to go from level 1 to level 2, and so on.")]
         [SerializeField] private int[] _experienceToNextLevel = new int[0];
@@ -33,6 +37,7 @@ namespace Game.Configs
         public float BaseProjectileSpeed => _baseProjectileSpeed;
         public int BasePierceCount => _basePierceCount;
         public int AttackCount => _attackCount;
+        public IReadOnlyList<HeroAbility> Abilities => _abilities;
 
         /// <summary>
         /// Ordered list of XP requirements to advance from level N to N+1.
