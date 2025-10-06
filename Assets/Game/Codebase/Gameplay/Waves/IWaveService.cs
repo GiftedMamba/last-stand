@@ -18,6 +18,11 @@ namespace Game.Gameplay.Waves
         float CurrentWaveRemaining { get; }
 
         /// <summary>
+        /// Current wave number (1-based). Returns 0 when there is no active wave or waves are finished.
+        /// </summary>
+        int CurrentWaveNumber { get; }
+
+        /// <summary>
         /// True when the last wave has completed.
         /// </summary>
         bool IsFinished { get; }

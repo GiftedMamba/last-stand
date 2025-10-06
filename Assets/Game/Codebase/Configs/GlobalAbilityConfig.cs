@@ -23,9 +23,14 @@ namespace Game.Configs
         [Tooltip("Optional VFX prefab to spawn on each affected target when the ability is applied. If null, no VFX will be spawned.")]
         [SerializeField] private GameObject _vfxPrefab;
 
+        [Header("UI")] 
+        [Tooltip("Icon to represent this global ability in UI elements (buttons, tooltips).")]
+        [SerializeField] private Sprite _icon;
+
         public GlobalAbility Ability => _ability;
         public IReadOnlyList<GlobalAbilityLevelEntry> Levels => _levels;
         public GameObject VfxPrefab => _vfxPrefab;
+        public Sprite Icon => _icon;
 
         /// <summary>
         /// Returns level entry by index or null if out of range.

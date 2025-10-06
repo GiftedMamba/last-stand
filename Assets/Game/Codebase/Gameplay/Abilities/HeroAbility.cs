@@ -14,8 +14,13 @@ namespace Game.Gameplay.Abilities
     {
         [SerializeField] private HeroAbilityType _type = HeroAbilityType.Unknown;
         [SerializeField] private List<HeroAbilityLevel> _levels = new();
+        
+        [Header("UI")] 
+        [Tooltip("Icon to represent this hero ability in UI elements (choice cards, tooltips).")]
+        [SerializeField] private Sprite _icon;
 
         public HeroAbilityType Type => _type;
         public IReadOnlyList<HeroAbilityLevel> Levels => _levels;
+        public Sprite Icon => _icon;
     }
 }

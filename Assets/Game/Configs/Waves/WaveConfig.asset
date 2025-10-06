@@ -16,3 +16,6 @@ MonoBehaviour:
   - Time: 60
     EnemyTypes: 02000000
     BossType: 0
+  - Time: 70
+    EnemyTypes: 02000000
+    BossType: 0

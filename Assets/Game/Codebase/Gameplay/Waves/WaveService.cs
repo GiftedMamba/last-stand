@@ -51,6 +51,15 @@ namespace Game.Gameplay.Waves
             }
         }
         public bool IsFinished => _finished;
+        public int CurrentWaveNumber
+        {
+            get
+            {
+                if (_finished || _currentWaveIndex < 0)
+                    return 0;
+                return _currentWaveIndex + 1;
+            }
+        }
         public event Action Finished;
 
         public void Start()
