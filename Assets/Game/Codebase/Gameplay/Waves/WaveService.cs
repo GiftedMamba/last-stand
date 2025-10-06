@@ -19,6 +19,7 @@ namespace Game.Gameplay.Waves
         private readonly WaveConfig _config;
         private readonly IScreenService _screenService;
         private readonly GameOverController _gameOverController;
+        private readonly Game.Gameplay.Enemies.EnemyRegistry _enemyRegistry;
 
         private readonly List<EnemyType> _allowedTypes = new();
         private int _currentWaveIndex = -1;
@@ -26,12 +27,14 @@ namespace Game.Gameplay.Waves
         private float _waveElapsed;
         private bool _finished;
         private bool _loggedWin;
+        private bool _waitForClear;
 
-        public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController)
+        public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController, Game.Gameplay.Enemies.EnemyRegistry enemyRegistry)
         {
             _config = config;
             _screenService = screenService;
             _gameOverController = gameOverController;
+            _enemyRegistry = enemyRegistry;
         }
 
         public IReadOnlyList<EnemyType> AllowedTypes => _allowedTypes;
@@ -57,6 +60,7 @@ namespace Game.Gameplay.Waves
             _currentWaveIndex = -1;
             _finished = false;
             _loggedWin = false;
+            _waitForClear = false;
             _allowedTypes.Clear();
 
             // Immediately enter first wave if any
@@ -73,8 +77,24 @@ namespace Game.Gameplay.Waves
 
         public void Tick()
         {
-            if (_finished || _config == null || _config.Waves == null || _config.Waves.Count == 0)
+            if (_config == null || _config.Waves == null || _config.Waves.Count == 0)
                 return;
+
+            if (_finished)
+            {
+                if (_waitForClear && _enemyRegistry != null)
+                {
+                    var list = _enemyRegistry.Enemies;
+                    int alive = list != null ? list.Count : 0;
+                    if (alive <= 0)
+                    {
+                        // All enemies cleared: show win now
+                        ShowWinOnce();
+                        _waitForClear = false;
+                    }
+                }
+                return;
+            }
 
             float dt = UnityEngine.Time.deltaTime;
             _elapsed += dt;
@@ -156,36 +176,56 @@ namespace Game.Gameplay.Waves
             if (_finished) return;
             _finished = true;
             _allowedTypes.Clear();
-            if (!_loggedWin)
+
+            // Decide whether to wait for all enemies to be cleared before showing WinScreen
+            int alive = 0;
+            if (_enemyRegistry != null && _enemyRegistry.Enemies != null)
+                alive = _enemyRegistry.Enemies.Count;
+
+            if (alive > 0)
             {
-                _loggedWin = true;
-                // Show Win Screen instead of just logging
-                if (_screenService != null)
+                // Defer showing win screen until enemies are cleared
+                _waitForClear = true;
+            }
+            else
+            {
+                ShowWinOnce();
+            }
+        }
+
+        private void ShowWinOnce()
+        {
+            if (_loggedWin)
+                return;
+
+            _loggedWin = true;
+            // Show Win Screen
+            if (_screenService != null)
+            {
+                var instance = _screenService.Show("WinScreen");
+                if (instance != null)
                 {
-                    var instance = _screenService.Show("WinScreen");
-                    if (instance != null)
+                    var win = instance.GetComponentInChildren<WinScreenBehaviour>(true);
+                    if (win != null)
                     {
-                        var win = instance.GetComponentInChildren<WinScreenBehaviour>(true);
-                        if (win != null)
+                        int stars = 0;
+                        if (_gameOverController != null)
                         {
-                            int stars = 0;
-                            if (_gameOverController != null)
-                            {
-                                stars = Mathf.Max(0, _gameOverController.AliveTowersCount);
-                            }
-                            win.SetStarsCount(stars);
+                            stars = Mathf.Max(0, _gameOverController.AliveTowersCount);
                         }
-                        else
-                        {
-                            GameLogger.LogWarning("WaveService: WinScreen shown but WinScreenBehaviour not found. Stars will not be initialized.");
-                        }
+                        win.SetStarsCount(stars);
+                    }
+                    else
+                    {
+                        GameLogger.LogWarning("WaveService: WinScreen shown but WinScreenBehaviour not found. Stars will not be initialized.");
                     }
                 }
-                else
-                {
-                    GameLogger.LogWarning("WaveService: IScreenService not available. Cannot show WinScreen.");
-                }
             }
+            else
+            {
+                GameLogger.LogWarning("WaveService: IScreenService not available. Cannot show WinScreen.");
+            }
+
             try { Finished?.Invoke(); } catch { /* ignore */ }
         }
 

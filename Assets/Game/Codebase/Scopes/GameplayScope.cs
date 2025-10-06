@@ -119,6 +119,7 @@ namespace Game.Scopes
 
             builder.RegisterComponentInHierarchy<EnemySpawner>();
             builder.RegisterComponentInHierarchy<Game.Gameplay.Player.PlayerSpawner>();
+            builder.RegisterComponentInHierarchy<EnemyRegistry>();
         }
     }
 }

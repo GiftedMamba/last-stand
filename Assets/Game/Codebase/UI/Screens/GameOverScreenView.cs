@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Game.Core;
 
 namespace Game.UI.Screens
 {
@@ -12,9 +13,6 @@ namespace Game.UI.Screens
     {
         [Header("Bindings")]
         [SerializeField] private Button _restartButton;
-
-        [Header("Config")]
-        [SerializeField] private string _gameplaySceneName = "Gameplay";
 
         private void Awake()
         {
@@ -30,10 +28,7 @@ namespace Game.UI.Screens
 
         public void Restart()
         {
-            if (string.IsNullOrWhiteSpace(_gameplaySceneName))
-                return;
-
-            SceneManager.LoadScene(_gameplaySceneName, LoadSceneMode.Single);
+            SceneManager.LoadScene(SceneNames.Gameplay, LoadSceneMode.Single);
         }
     }
 }
