@@ -46,6 +46,7 @@ namespace Game.Scopes
             
             builder.RegisterComponentInHierarchy<GlobalAbilityExecutor>().As<IGlobalAbilityExecutor>();
             builder.Register<IGlobalAbilityService, GlobalAbilityService>(Lifetime.Singleton);
+            builder.Register<IHeroAbilityService, HeroAbilityService>(Lifetime.Singleton);
 
             builder.RegisterComponentInHierarchy<CameraShake>();
 

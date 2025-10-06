@@ -18,13 +18,15 @@ namespace Game.Gameplay.LevelUp
         private readonly IPlayerLevelService _playerLevelService;
         private readonly GlobalAbilityCatalog _catalog;
         private readonly IGlobalAbilityService _abilityService;
+        private readonly IHeroAbilityService _heroAbilityService;
 
-        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService, GlobalAbilityCatalog catalog, IGlobalAbilityService abilityService)
+        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService, GlobalAbilityCatalog catalog, IGlobalAbilityService abilityService, IHeroAbilityService heroAbilityService)
         {
             _screenService = screenService;
             _playerLevelService = playerLevelService;
             _catalog = catalog;
             _abilityService = abilityService;
+            _heroAbilityService = heroAbilityService;
         }
 
         public void Start()
@@ -89,6 +91,18 @@ namespace Game.Gameplay.LevelUp
                 if (inc != null)
                 {
                     inc.Init(chosen, _abilityService);
+                }
+
+                // Initialize hero ability increase button if present on the screen
+                var heroInc = instance.GetComponentInChildren<UIIncreaseHeroAbilityLevelButton>(true);
+                if (heroInc != null)
+                {
+                    var heroType = HeroAbilityType.SplitShot; // default choice; can be randomized/config-driven later
+                    if (_heroAbilityService == null)
+                    {
+                        GameLogger.LogError("LevelUpService: IHeroAbilityService is not available. Hero ability button will not function.");
+                    }
+                    heroInc.Init(heroType, _heroAbilityService);
                 }
             }
         }
