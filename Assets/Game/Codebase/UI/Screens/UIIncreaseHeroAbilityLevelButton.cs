@@ -59,7 +59,21 @@ namespace Game.UI.Screens
             if (!_initialized || _service == null)
                 return;
 
-            _service.IncreaseLevel(_abilityType);
+            if (_service.CanIncrease(_abilityType))
+                _service.IncreaseLevel(_abilityType);
+        }
+
+        public void SetInteractable(bool interactable)
+        {
+            if (_button != null)
+            {
+                _button.interactable = interactable;
+            }
+
+            if (_label != null)
+            {
+                _label.alpha = interactable ? 1f : 0.5f;
+            }
         }
     }
 }

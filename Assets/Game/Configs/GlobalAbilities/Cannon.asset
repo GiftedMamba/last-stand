@@ -33,5 +33,5 @@ MonoBehaviour:
     _duration: 5
     _damage: 125
     _isPercent: 0
-    _splash: 3
+    _splash: 6
   _vfxPrefab: {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473, type: 3}

@@ -61,5 +61,19 @@ namespace Game.UI.Screens
 
             _service.IncreaseLevel(_ability);
         }
+
+        public void SetInteractable(bool interactable)
+        {
+            if (_button != null)
+            {
+                _button.interactable = interactable;
+            }
+
+            // Optional: gray out label if present
+            if (_label != null)
+            {
+                _label.alpha = interactable ? 1f : 0.5f;
+            }
+        }
     }
 }

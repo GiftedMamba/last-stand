@@ -104,6 +104,12 @@ namespace Game.Gameplay.Player
             _config = config;
             _enemyRegistry = registry;
 
+            // Inform hero ability service about config so it can determine max levels
+            if (_heroAbilityService != null && _config != null)
+            {
+                _heroAbilityService.RegisterConfig(_config);
+            }
+
             var projectileSrc = _projectilePrefabOverride != null ? _projectilePrefabOverride.name : (_config != null && _config.ProjectilePrefab != null ? _config.ProjectilePrefab.name : "null");
             int enemyCount = _enemyRegistry != null && _enemyRegistry.Enemies != null ? _enemyRegistry.Enemies.Count : -1;
 

@@ -1,4 +1,5 @@
-﻿using Game.Gameplay.Abilities;
+﻿using Game.Configs;
+using Game.Gameplay.Abilities;
 
 namespace Game.Gameplay.Abilities
 {
@@ -10,5 +11,7 @@ namespace Game.Gameplay.Abilities
     {
         void IncreaseLevel(HeroAbilityType abilityType);
         int GetLevel(HeroAbilityType abilityType);
+        void RegisterConfig(PlayerConfig playerConfig);
+        bool CanIncrease(HeroAbilityType abilityType);
     }
 }
