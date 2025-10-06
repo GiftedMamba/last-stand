@@ -17,13 +17,14 @@ MonoBehaviour:
   _baseDamage: 25
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 30
-  _basePierceCount: 2
   _attackCount: 5
   _abilities:
   - _type: 1
     _levels:
     - _value: 1
+    _currentLevel: 0
   - _type: 2
     _levels:
-    - _value: 1
+    - _value: 2
+    _currentLevel: 0
   _experienceToNextLevel: 64000000c80000002c01000090010000f401000058020000bc0200002003000084030000e8030000

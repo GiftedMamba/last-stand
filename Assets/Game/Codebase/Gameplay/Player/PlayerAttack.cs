@@ -1,7 +1,9 @@
-﻿using Game.Configs;
+﻿using System.Collections.Generic;
+using Game.Configs;
 using Game.Core;
 using Game.Gameplay.Combat;
 using Game.Gameplay.Enemies;
+using Game.Gameplay.Abilities;
 using UnityEngine;
 
 namespace Game.Gameplay.Player
@@ -37,6 +39,22 @@ namespace Game.Gameplay.Player
         private bool _loggedNoTarget;
         private bool _loggedOutOfRange;
         private bool _loggedNoShootTriggerParam;
+
+        // Runtime ability levels tracked here (not in config). Missing entries default to 0.
+        private readonly Dictionary<HeroAbilityType, int> _abilityLevels = new();
+
+        public void SetAbilityLevel(HeroAbilityType type, int level)
+        {
+            if (level < 0) level = 0;
+            _abilityLevels[type] = level;
+        }
+
+        public int GetAbilityLevel(HeroAbilityType type)
+        {
+            if (_abilityLevels != null && _abilityLevels.TryGetValue(type, out var lvl))
+                return lvl < 0 ? 0 : lvl;
+            return 0;
+        }
 
         private void Awake()
         {
@@ -184,6 +202,37 @@ namespace Game.Gameplay.Player
             _pendingTarget = null; // clear either way to avoid repeated shots
         }
 
+        private int GetPierceCountFromAbilities()
+        {
+            if (_config == null)
+                return 0;
+
+            var abilities = _config.Abilities;
+            if (abilities == null)
+                return 0;
+
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                var ab = abilities[i];
+                if (ab == null || ab.Type != HeroAbilityType.Pierce)
+                    continue;
+
+                var levels = ab.Levels;
+                if (levels == null || levels.Count == 0)
+                    return 0;
+
+                int idx = GetAbilityLevel(HeroAbilityType.Pierce);
+                if (idx < 0) idx = 0;
+                if (idx >= levels.Count) idx = levels.Count - 1;
+
+                float value = levels[idx] != null ? levels[idx].Value : 0f;
+                int pierce = Mathf.Max(0, Mathf.FloorToInt(value));
+                return pierce;
+            }
+
+            return 0;
+        }
+
         private void FireAt(Enemy target)
         {
             var spawnPos = _firePoint != null ? _firePoint.position : transform.position + Vector3.up * 0.5f;
@@ -208,11 +257,11 @@ namespace Game.Gameplay.Player
 
             // Determine spread based on config.AttackCount (1..5)
             int count = Mathf.Clamp(_config.AttackCount, 1, 5);
-            int[] angleOrder = { 0, -20, 20, -40, 40 };
+            int[] angleOrder = { 0, -15, 15, -35, 35 };
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
             float dmg = Mathf.Max(0f, _config.BaseDamage);
-            int pierceCount = Mathf.Max(0, _config.BasePierceCount);
+            int pierceCount = GetPierceCountFromAbilities();
 
             for (int i = 0; i < count && i < angleOrder.Length; i++)
             {

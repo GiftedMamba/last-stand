@@ -20,7 +20,6 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _baseDamage = 10f;
         [SerializeField, Min(0f)] private float _baseAttackSpeed = 1f; // attacks per second
         [SerializeField, Min(0f)] private float _baseProjectileSpeed = 10f; // units per second
-        [SerializeField, Min(0)] private int _basePierceCount = 0; // how many enemies projectile can pierce through
         [SerializeField, Range(1,5)] private int _attackCount = 1; // number of simultaneous shots (1..5)
 
         [Header("Abilities")]
@@ -35,7 +34,6 @@ namespace Game.Configs
         public float BaseDamage => _baseDamage;
         public float BaseAttackSpeed => _baseAttackSpeed;
         public float BaseProjectileSpeed => _baseProjectileSpeed;
-        public int BasePierceCount => _basePierceCount;
         public int AttackCount => _attackCount;
         public IReadOnlyList<HeroAbility> Abilities => _abilities;
 

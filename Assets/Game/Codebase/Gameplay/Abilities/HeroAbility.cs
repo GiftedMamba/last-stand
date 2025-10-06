@@ -7,6 +7,7 @@ namespace Game.Gameplay.Abilities
     /// <summary>
     /// Data container describing a single hero ability.
     /// Extend with ability-specific parameters as needed (e.g., levels, values).
+    /// Note: current level is tracked at runtime (e.g., by PlayerAttack), not in this config.
     /// </summary>
     [Serializable]
     public class HeroAbility
