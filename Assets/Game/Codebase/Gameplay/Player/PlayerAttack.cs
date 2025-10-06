@@ -39,6 +39,7 @@ namespace Game.Gameplay.Player
         private bool _loggedNoTarget;
         private bool _loggedOutOfRange;
         private bool _loggedNoShootTriggerParam;
+        private bool _warnedSplitShotCap;
 
         // Runtime ability levels tracked here (not in config). Missing entries default to 0.
         private readonly Dictionary<HeroAbilityType, int> _abilityLevels = new();
@@ -202,6 +203,49 @@ namespace Game.Gameplay.Player
             _pendingTarget = null; // clear either way to avoid repeated shots
         }
 
+        private int GetSplitShotCountFromAbilities()
+        {
+            // Default to 1 shot if ability/levels not configured
+            if (_config == null)
+                return 1;
+
+            var abilities = _config.Abilities;
+            if (abilities == null)
+                return 1;
+
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                var ab = abilities[i];
+                if (ab == null || ab.Type != HeroAbilityType.SplitShot)
+                    continue;
+
+                var levels = ab.Levels;
+                if (levels == null || levels.Count == 0)
+                    return 1;
+
+                int idx = GetAbilityLevel(HeroAbilityType.SplitShot);
+                if (idx < 0) idx = 0;
+                if (idx >= levels.Count) idx = levels.Count - 1;
+
+                float raw = levels[idx] != null ? levels[idx].Value : 1f;
+                int count = Mathf.FloorToInt(raw);
+                if (count <= 0)
+                    count = 1; // ensure at least one shot
+                if (count > 5)
+                {
+                    if (!_warnedSplitShotCap)
+                    {
+                        GameLogger.LogWarning($"PlayerAttack: SplitShot value {count} exceeds maximum of 5. Capping to 5.");
+                        _warnedSplitShotCap = true;
+                    }
+                    count = 5;
+                }
+                return count;
+            }
+
+            return 1;
+        }
+
         private int GetPierceCountFromAbilities()
         {
             if (_config == null)
@@ -255,8 +299,8 @@ namespace Game.Gameplay.Player
                 return;
             }
 
-            // Determine spread based on config.AttackCount (1..5)
-            int count = Mathf.Clamp(_config.AttackCount, 1, 5);
+            // Determine spread based on SplitShot ability (1..5). Angles order matches level mapping.
+            int count = GetSplitShotCountFromAbilities();
             int[] angleOrder = { 0, -15, 15, -35, 35 };
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
