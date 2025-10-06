@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.Gameplay.Abilities
@@ -11,7 +12,9 @@ namespace Game.Gameplay.Abilities
     public class HeroAbility
     {
         [SerializeField] private HeroAbilityType _type = HeroAbilityType.Unknown;
+        [SerializeField] private List<HeroAbilityLevel> _levels = new();
 
         public HeroAbilityType Type => _type;
+        public IReadOnlyList<HeroAbilityLevel> Levels => _levels;
     }
 }

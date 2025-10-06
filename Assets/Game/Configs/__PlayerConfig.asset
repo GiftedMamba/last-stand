@@ -21,5 +21,9 @@ MonoBehaviour:
   _attackCount: 5
   _abilities:
   - _type: 1
+    _levels:
+    - _value: 1
   - _type: 2
+    _levels:
+    - _value: 1
   _experienceToNextLevel: 64000000c80000002c01000090010000f401000058020000bc0200002003000084030000e8030000
