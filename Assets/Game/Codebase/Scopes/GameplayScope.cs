@@ -32,7 +32,8 @@ namespace Game.Scopes
             }
             else
             {
-                builder.RegisterInstance<IScreenService>(new ScreenService(_uiRoot.Root));
+                builder.RegisterInstance(_uiRoot);
+                builder.Register<IScreenService, ScreenService>(Lifetime.Singleton);
             }
 
             if (_globalAbilityCatalog == null)

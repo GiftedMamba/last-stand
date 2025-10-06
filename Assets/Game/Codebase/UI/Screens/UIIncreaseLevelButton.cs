@@ -3,7 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
-using VContainer.Unity;
 using Game.Configs;
 
 namespace Game.UI.Screens
@@ -25,6 +24,12 @@ namespace Game.UI.Screens
         private bool _initialized;
         private GlobalAbilityCatalog _catalog;
 
+        [Inject]
+        public void Construct(GlobalAbilityCatalog catalog)
+        {
+            _catalog = catalog;
+        }
+
         private void Awake()
         {
             _button = GetComponent<Button>();
@@ -36,13 +41,6 @@ namespace Game.UI.Screens
             if (_button != null)
             {
                 _button.onClick.AddListener(OnClicked);
-            }
-
-            // Try resolve catalog from nearest LifetimeScope (DI) so we can fetch icons
-            var scope = GetComponentInParent<LifetimeScope>();
-            if (scope != null)
-            {
-                scope.Container.TryResolve(out _catalog);
             }
         }
 

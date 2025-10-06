@@ -23,9 +23,11 @@ MonoBehaviour:
     - _value: 1
     - _value: 3
     - _value: 5
+    _icon: {fileID: 21300000, guid: 6ac2fd3011ce32145a296896013582b2, type: 3}
   - _type: 2
     _levels:
     - _value: 1
     - _value: 2
     - _value: 3
+    _icon: {fileID: 21300000, guid: 9397c41c47174074bb2fd790704881f5, type: 3}
   _experienceToNextLevel: 64000000c80000002c01000090010000f401000058020000bc0200002003000084030000e8030000

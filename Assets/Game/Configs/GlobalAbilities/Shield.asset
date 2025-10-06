@@ -35,3 +35,4 @@ MonoBehaviour:
     _isPercent: 0
     _splash: 0
   _vfxPrefab: {fileID: 272589623740281236, guid: 2ffc54e016886014aa9e8baffc9b391b, type: 3}
+  _icon: {fileID: 21300000, guid: bc7935d9d59f4d9439162ef978e2ed04, type: 3}

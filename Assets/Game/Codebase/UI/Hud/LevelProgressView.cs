@@ -52,17 +52,7 @@ namespace Game.UI.Hud
 
             if (_playerLevel == null)
             {
-                // Attempt to resolve from nearest LifetimeScope when DI hasn't injected yet
-                var scope = GetComponentInParent<LifetimeScope>();
-                if (scope != null)
-                {
-                    scope.Container.TryResolve(out _playerLevel);
-                }
-            }
-
-            if (_playerLevel == null)
-            {
-                // Defer until DI provides the service
+                // Defer until DI provides the service strictly via VContainer injection as per guidelines
                 return;
             }
 

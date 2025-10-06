@@ -1,5 +1,7 @@
 ﻿using Game.Core;
 using UnityEngine;
+using VContainer;
+using VContainer.Unity;
 
 namespace Game.UI.Screens
 {
@@ -15,10 +17,12 @@ namespace Game.UI.Screens
     public sealed class ScreenService : IScreenService
     {
         private readonly Transform _uiRoot;
+        private readonly IObjectResolver _resolver;
 
-        public ScreenService(Transform uiRoot)
+        public ScreenService(UIRoot uiRoot, IObjectResolver resolver)
         {
-            _uiRoot = uiRoot;
+            _uiRoot = uiRoot != null ? uiRoot.Root : null;
+            _resolver = resolver;
         }
 
         public GameObject Show(string prefabName)
@@ -36,7 +40,9 @@ namespace Game.UI.Screens
                 return null;
             }
 
-            var instance = Object.Instantiate(prefab, _uiRoot, worldPositionStays: false);
+            var instance = _resolver != null
+                ? _resolver.Instantiate(prefab, _uiRoot)
+                : Object.Instantiate(prefab, _uiRoot, worldPositionStays: false);
             instance.name = prefab.name; // clean instance name
 
             // Ensure LevelUpScreen can be closed via its OK button without prefab changes
