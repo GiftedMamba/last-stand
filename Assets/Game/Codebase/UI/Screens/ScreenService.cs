@@ -54,6 +54,12 @@ namespace Game.UI.Screens
                 }
             }
 
+            // Ensure bounce-out animation on open for all screens
+            if (instance.GetComponent<ScreenOpenBounce>() == null)
+            {
+                instance.AddComponent<ScreenOpenBounce>();
+            }
+
             // Pause the game while modal screens are shown
             if (prefabName == "LevelUpScreen" || prefabName == "GameOverScreen" || prefabName == "WinScreen")
             {

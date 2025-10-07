@@ -426,6 +426,8 @@ GameObject:
   - component: {fileID: 5738598009235765362}
   - component: {fileID: 2629649173987189916}
   - component: {fileID: 2184775962480453834}
+  - component: {fileID: 7379149125962481939}
+  - component: {fileID: 3213254474389403769}
   m_Layer: 5
   m_Name: GameOverScreen
   m_TagString: Untagged
@@ -475,7 +477,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.GameOverScreenView
   _restartButton: {fileID: 6131574606997003792}
-  _gameplaySceneName: Gameplay
+--- !u!114 &7379149125962481939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4776611699334768019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb042aa520f4bc48d0e89a46286f06d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.ScreenContainer
+  _container: {fileID: 4544567562010586077}
+--- !u!114 &3213254474389403769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4776611699334768019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92528f8b742148ba9ea3794143ac33aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.ScreenOpenBounce
+  _duration: 0.25
+  _startScale: 0.25
+  _ease: 27
+  _playOnEnable: 1
 --- !u!1 &5811989929233194257
 GameObject:
   m_ObjectHideFlags: 0

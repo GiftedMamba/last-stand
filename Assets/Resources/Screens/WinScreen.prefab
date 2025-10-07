@@ -522,6 +522,8 @@ GameObject:
   - component: {fileID: 5738598009235765362}
   - component: {fileID: 2629649173987189916}
   - component: {fileID: -345899724022972036}
+  - component: {fileID: 6469490507563967296}
+  - component: {fileID: 1614283146519299503}
   m_Layer: 5
   m_Name: WinScreen
   m_TagString: Untagged
@@ -575,6 +577,35 @@ MonoBehaviour:
   - {fileID: 6210772106707125790}
   - {fileID: 2475066316693827899}
   _restartButton: {fileID: 7804333177809199021}
+--- !u!114 &6469490507563967296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4776611699334768019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb042aa520f4bc48d0e89a46286f06d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.ScreenContainer
+  _container: {fileID: 3797020091756845063}
+--- !u!114 &1614283146519299503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4776611699334768019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92528f8b742148ba9ea3794143ac33aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.UI.Screens.ScreenOpenBounce
+  _duration: 0.25
+  _startScale: 0.25
+  _ease: 27
+  _playOnEnable: 1
 --- !u!1 &4795642521294011210
 GameObject:
   m_ObjectHideFlags: 0
