@@ -29,6 +29,10 @@ namespace Game.Gameplay.Waves
         private bool _loggedWin;
         private bool _waitForClear;
 
+        // Inter-wave timeout state
+        private bool _betweenWaves;
+        private float _betweenElapsed;
+
         public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController, Game.Gameplay.Enemies.EnemyRegistry enemyRegistry)
         {
             _config = config;
@@ -43,8 +47,19 @@ namespace Game.Gameplay.Waves
             get
             {
                 var waves = _config?.Waves;
-                if (_finished || waves == null || waves.Count == 0 || _currentWaveIndex < 0)
+                if (_finished || waves == null || waves.Count == 0)
                     return 0f;
+
+                if (_betweenWaves)
+                {
+                    float timeout = Mathf.Max(0f, _config != null ? _config.TimeBetweenWaves : 0f);
+                    float remBw = timeout - _betweenElapsed;
+                    return remBw > 0f ? remBw : 0f;
+                }
+
+                if (_currentWaveIndex < 0)
+                    return 0f;
+
                 float currentDuration = Math.Max(0.01f, waves[_currentWaveIndex].Time);
                 var rem = currentDuration - _waveElapsed;
                 return rem > 0f ? rem : 0f;
@@ -94,6 +109,8 @@ namespace Game.Gameplay.Waves
         {
             _elapsed = 0f;
             _waveElapsed = 0f;
+            _betweenElapsed = 0f;
+            _betweenWaves = false;
             _currentWaveIndex = -1;
             _finished = false;
             _loggedWin = false;
@@ -135,7 +152,15 @@ namespace Game.Gameplay.Waves
 
             float dt = UnityEngine.Time.deltaTime;
             _elapsed += dt;
-            _waveElapsed += dt;
+
+            if (_betweenWaves)
+            {
+                _betweenElapsed += dt;
+            }
+            else
+            {
+                _waveElapsed += dt;
+            }
 
             AdvanceIfNeeded();
         }
@@ -150,8 +175,27 @@ namespace Game.Gameplay.Waves
                 return;
             }
 
-            if (_currentWaveIndex < 0)
+            if (_currentWaveIndex < 0 && !_betweenWaves)
                 return;
+
+            if (_betweenWaves)
+            {
+                float timeout = Mathf.Max(0f, _config != null ? _config.TimeBetweenWaves : 0f);
+                if (_betweenElapsed >= timeout)
+                {
+                    int nextIndex = _currentWaveIndex + 1;
+                    if (nextIndex < waves.Count)
+                    {
+                        EnterWave(nextIndex);
+                    }
+                    else
+                    {
+                        // No next wave; complete
+                        CompleteOnce();
+                    }
+                }
+                return;
+            }
 
             // Each wave's Time is treated as its duration
             float currentDuration = Math.Max(0.01f, waves[_currentWaveIndex].Time);
@@ -160,7 +204,7 @@ namespace Game.Gameplay.Waves
                 int nextIndex = _currentWaveIndex + 1;
                 if (nextIndex < waves.Count)
                 {
-                    EnterWave(nextIndex);
+                    EnterBetweenWaves();
                 }
                 else
                 {
@@ -170,8 +214,18 @@ namespace Game.Gameplay.Waves
             }
         }
 
+        private void EnterBetweenWaves()
+        {
+            _betweenWaves = true;
+            _betweenElapsed = 0f;
+            _allowedTypes.Clear(); // pause spawns during intermission
+        }
+
         private void EnterWave(int index)
         {
+            _betweenWaves = false;
+            _betweenElapsed = 0f;
+
             _currentWaveIndex = index;
             _waveElapsed = 0f;
             _allowedTypes.Clear();
@@ -212,6 +266,7 @@ namespace Game.Gameplay.Waves
         {
             if (_finished) return;
             _finished = true;
+            _betweenWaves = false;
             _allowedTypes.Clear();
 
             // Decide whether to wait for all enemies to be cleared before showing WinScreen

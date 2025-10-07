@@ -13,7 +13,9 @@ namespace Game.Gameplay.Waves
         IReadOnlyList<EnemyType> AllowedTypes { get; }
 
         /// <summary>
-        /// Remaining time in seconds for the current wave. Returns 0 when there is no active wave or waves are finished.
+        /// Remaining time in seconds for the current wave. When in an inter-wave timeout,
+        /// returns the remaining timeout seconds instead of 0. Returns 0 only when no
+        /// active wave and no inter-wave timeout is running (i.e., finished).
         /// </summary>
         float CurrentWaveRemaining { get; }
 

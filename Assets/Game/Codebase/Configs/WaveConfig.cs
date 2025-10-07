@@ -13,6 +13,10 @@ namespace Game.Configs
     [CreateAssetMenu(fileName = "WaveConfig", menuName = "Game/Configs/Wave Config", order = 2)]
     public class WaveConfig : ScriptableObject
     {
+        [Header("Global Settings")]
+        [Tooltip("Time (seconds) to wait between waves before the next one starts.")]
+        [Min(0f)] public float TimeBetweenWaves = 10f;
+
         [SerializeField]
         private List<Wave> _waves = new();
 

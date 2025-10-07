@@ -17,9 +17,9 @@ MonoBehaviour:
     EnemyTypes: 02000000
     BossType: 0
     StartSpawnPeriod: 5
-    EndSpawnPeriod: 3
+    EndSpawnPeriod: 2.5
   - Time: 70
     EnemyTypes: 02000000
     BossType: 0
-    StartSpawnPeriod: 4
-    EndSpawnPeriod: 3
+    StartSpawnPeriod: 5
+    EndSpawnPeriod: 2.5
