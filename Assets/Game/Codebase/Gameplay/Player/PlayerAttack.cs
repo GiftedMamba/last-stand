@@ -301,6 +301,38 @@ namespace Game.Gameplay.Player
             return 0;
         }
 
+        private float GetCritChancePercentFromAbilities()
+        {
+            if (_config == null)
+                return 0f;
+
+            var abilities = _config.Abilities;
+            if (abilities == null)
+                return 0f;
+
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                var ab = abilities[i];
+                if (ab == null || ab.Type != HeroAbilityType.Crit)
+                    continue;
+
+                var levels = ab.Levels;
+                if (levels == null || levels.Count == 0)
+                    return 0f;
+
+                int idx = GetAbilityLevel(HeroAbilityType.Crit);
+                if (idx < 0) idx = 0;
+                if (idx >= levels.Count) idx = levels.Count - 1;
+
+                float percent = levels[idx] != null ? levels[idx].Value : 0f; // value interpreted as percent (e.g., 10 = 10%)
+                if (percent < 0f) percent = 0f;
+                if (percent > 100f) percent = 100f;
+                return percent;
+            }
+
+            return 0f;
+        }
+
         private void FireAt(Enemy target)
         {
             var spawnPos = _firePoint != null ? _firePoint.position : transform.position + Vector3.up * 0.5f;
@@ -328,8 +360,13 @@ namespace Game.Gameplay.Player
             int[] angleOrder = { 0, -15, 15, -35, 35 };
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
-            float dmg = Mathf.Max(0f, _config.BaseDamage);
+            float baseDamage = Mathf.Max(0f, _config.BaseDamage);
             int pierceCount = GetPierceCountFromAbilities();
+
+            // Crit parameters
+            float critChancePercent = GetCritChancePercentFromAbilities();
+            float critChance01 = Mathf.Clamp01(critChancePercent / 100f);
+            float critMul = _config != null ? Mathf.Max(1f, _config.CritMultiplier) : 2f;
 
             for (int i = 0; i < count && i < angleOrder.Length; i++)
             {
@@ -342,6 +379,25 @@ namespace Game.Gameplay.Player
                     GameLogger.LogError("PlayerAttack: Projectile prefab missing Projectile component.");
                     Destroy(go);
                     continue;
+                }
+
+                // Apply Split Shot damage reduction for additional arrows (index > 0)
+                float dmgMultiplier = 1f;
+                if (_config != null)
+                {
+                    float per = Mathf.Clamp01(_config.PercentToDecreaseForSplitShot / 100f);
+                    // Each additional arrow beyond the first loses 'per' damage; i is 0-based loop index
+                    dmgMultiplier = Mathf.Clamp01(1f - (i * per));
+                }
+
+                // Base damage after split-shot penalty
+                float dmg = baseDamage * dmgMultiplier;
+
+                // Decide crit per projectile (apply crit after split-shot scaling)
+                if (critChance01 > 0f && Random.value < critChance01)
+                {
+                    dmg *= critMul;
+                    GameLogger.Log($"Crit! Damage x{critMul:0.##} => {dmg:0.##}");
                 }
 
                 // For the central shot (0 deg), use the target snapshot; for side shots, fire forward without target snapshot

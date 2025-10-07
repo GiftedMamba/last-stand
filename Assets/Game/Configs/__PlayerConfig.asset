@@ -18,6 +18,8 @@ MonoBehaviour:
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 30
   _baseProjectileLifetime: 5
+  _critMultiplier: 2
+  _percentToDecreaseForSplitShot: 5
   _abilities:
   - _type: 1
     _levels:

@@ -22,6 +22,13 @@ namespace Game.Configs
         [SerializeField, Min(0f)] private float _baseProjectileSpeed = 10f; // units per second
         [SerializeField, Min(0f)] private float _baseProjectileLifetime = 5f; // seconds projectile survives if it doesn't hit
 
+        [Header("Combat Advanced")]
+        [Tooltip("Critical hit damage multiplier applied when a crit occurs (e.g., 2 = 2x damage).")]
+        [SerializeField, Min(1f)] private float _critMultiplier = 2f;
+
+        [Tooltip("Percent of damage decrease applied per additional Split Shot arrow beyond the first.")]
+        [SerializeField, Range(0f, 100f)] private float _percentToDecreaseForSplitShot = 10f;
+
         [Header("Abilities")]
         [SerializeField] private List<HeroAbility> _abilities = new();
 
@@ -35,6 +42,8 @@ namespace Game.Configs
         public float BaseAttackSpeed => _baseAttackSpeed;
         public float BaseProjectileSpeed => _baseProjectileSpeed;
         public float BaseProjectileLifetime => _baseProjectileLifetime;
+        public float CritMultiplier => _critMultiplier;
+        public float PercentToDecreaseForSplitShot => _percentToDecreaseForSplitShot;
         public IReadOnlyList<HeroAbility> Abilities => _abilities;
 
         /// <summary>
