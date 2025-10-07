@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Boss Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 8858051749441068820, guid: 4c67ed6c086451b4db54ac4d24b626bb, type: 3}
-  _explosionPrefab: {fileID: 0}
+  _explosionPrefab: {fileID: 4040049200811826080, guid: e48dcb2e2349c5547a3a31126daf973f, type: 3}
   _type: 8
   _maxHp: 1200
   _armor: 6
-  _moveSpeed: 1.8
-  _dpsToSpot: 20
-  _explodeDamageToTower: 10
+  _moveSpeed: 1.2
+  _dpsToSpot: 50
+  _explodeDamageToTower: 50
   _isBoss: 1
   _xpReward: 1
-  _aimPointYOffset: 1
+  _aimPointYOffset: 1.5

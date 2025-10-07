@@ -16,6 +16,6 @@ MonoBehaviour:
   _waves:
   - Time: 10
     EnemyTypes: 0200000005000000
-    BossType: 0
+    BossType: 8
     StartSpawnPeriod: 5
     EndSpawnPeriod: 2.5

@@ -178,7 +178,9 @@ namespace Game.Gameplay.Abilities
                         agent.isStopped = true;
                 }
 
-                if (e.TryGetComponent<Animator>(out var animator))
+                // Animator may be on a child after recent prefab changes
+                var animator = e.GetComponentInChildren<Animator>(true);
+                if (animator != null)
                 {
                     animator.SetBool(StunnedHash, true);
                 }
@@ -211,7 +213,9 @@ namespace Game.Gameplay.Abilities
                         agent.isStopped = false;
                 }
 
-                if (e.TryGetComponent<Animator>(out var animator))
+                // Animator may be on a child after recent prefab changes
+                var animator = e.GetComponentInChildren<Animator>(true);
+                if (animator != null)
                 {
                     animator.SetBool(StunnedHash, false);
                 }
