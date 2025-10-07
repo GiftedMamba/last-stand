@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
+using DG.Tweening;
 
 namespace Game.UI.Hud
 {
@@ -20,8 +21,13 @@ namespace Game.UI.Hud
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private Image _progressImage;
 
+        [Header("Animation")]
+        [SerializeField] private float _fillTime = 0.2f;
+
         private IPlayerLevelService _playerLevel;
         private bool _subscribed;
+        private Tween _fillTween;
+        private bool _levelUpAnimating;
 
         [Inject]
         public void Construct(IPlayerLevelService playerLevel)
@@ -43,6 +49,8 @@ namespace Game.UI.Hud
                 _playerLevel.LevelChanged -= OnLevelChanged;
                 _subscribed = false;
             }
+
+            KillFillTween();
         }
 
         private void TrySubscribe()
@@ -64,12 +72,24 @@ namespace Game.UI.Hud
 
         private void OnExperienceChanged(PlayerLevel.ExperienceChangedEvent _)
         {
+            if (_levelUpAnimating)
+                return;
             RefreshProgressOnly();
         }
 
         private void OnLevelChanged(PlayerLevel.LevelChangedEvent _)
         {
-            RefreshAll();
+            if (_playerLevel == null)
+                return;
+
+            // Update level label immediately
+            if (_levelText != null)
+            {
+                _levelText.text = _playerLevel.Level.ToString();
+            }
+
+            // Animate progress: fill to end, reset, then to remainder
+            AnimateLevelUpTransition();
         }
 
         private void RefreshAll()
@@ -91,18 +111,76 @@ namespace Game.UI.Hud
         {
             if (_playerLevel == null)
                 return;
+            if (_levelUpAnimating)
+                return;
 
             if (_progressImage != null)
             {
-                float fill = _playerLevel.LevelProgress01;
+                float target = _playerLevel.LevelProgress01;
                 // Ensure valid range
-                fill = Mathf.Clamp01(fill);
+                target = Mathf.Clamp01(target);
                 // At max level, make sure it's visually full
                 if (_playerLevel.IsMaxLevel)
-                    fill = 1f;
+                    target = 1f;
 
-                _progressImage.fillAmount = fill;
+                if (_fillTime <= 0f)
+                {
+                    KillFillTween();
+                    _progressImage.fillAmount = target;
+                    return;
+                }
+
+                // Animate from current to target
+                KillFillTween();
+                _fillTween = _progressImage
+                    .DOFillAmount(target, _fillTime)
+                    .SetEase(Ease.Linear);
             }
+        }
+
+        private void AnimateLevelUpTransition()
+        {
+            if (_progressImage == null)
+                return;
+
+            float target = _playerLevel.LevelProgress01;
+            target = Mathf.Clamp01(target);
+            if (_playerLevel.IsMaxLevel)
+                target = 1f;
+
+            KillFillTween();
+
+            if (_fillTime <= 0f)
+            {
+                // Instant: show just the new target
+                _progressImage.fillAmount = target;
+                return;
+            }
+
+            _levelUpAnimating = true;
+            float half = _fillTime * 0.5f;
+
+            var seq = DOTween.Sequence();
+            seq.Append(_progressImage.DOFillAmount(1f, Mathf.Max(0.01f, half)).SetEase(Ease.Linear));
+            seq.AppendCallback(() => { if (_progressImage != null) _progressImage.fillAmount = 0f; });
+            seq.Append(_progressImage.DOFillAmount(target, Mathf.Max(0.01f, half)).SetEase(Ease.Linear));
+            seq.OnComplete(() =>
+            {
+                _levelUpAnimating = false;
+                _fillTween = null;
+            });
+
+            _fillTween = seq;
+        }
+
+        private void KillFillTween()
+        {
+            if (_fillTween != null && _fillTween.IsActive())
+            {
+                _fillTween.Kill();
+                _fillTween = null;
+            }
+            _levelUpAnimating = false;
         }
     }
 }
