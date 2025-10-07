@@ -120,6 +120,7 @@ namespace Game.Scopes
             builder.RegisterComponentInHierarchy<LevelProgressView>();
 
             builder.RegisterComponentInHierarchy<EnemySpawner>();
+            builder.RegisterComponentInHierarchy<BossSpawner>();
             builder.RegisterComponentInHierarchy<Game.Gameplay.Player.PlayerSpawner>();
             builder.RegisterComponentInHierarchy<EnemyRegistry>();
         }
