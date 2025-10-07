@@ -9,5 +9,6 @@
         Unknown = 0,
         SplitShot = 1,
         Pierce = 2,
+        Crit = 3,
     }
 }

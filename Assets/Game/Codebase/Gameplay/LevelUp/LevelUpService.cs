@@ -141,7 +141,8 @@ namespace Game.Gameplay.LevelUp
                         var candidates = new System.Collections.Generic.List<HeroAbilityType>
                         {
                             HeroAbilityType.SplitShot,
-                            HeroAbilityType.Pierce
+                            HeroAbilityType.Pierce,
+                            HeroAbilityType.Crit
                         };
                         var upgradableHero = new System.Collections.Generic.List<HeroAbilityType>();
                         for (int i = 0; i < candidates.Count; i++)

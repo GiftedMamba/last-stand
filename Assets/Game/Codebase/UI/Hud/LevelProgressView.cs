@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using VContainer;
 using VContainer.Unity;
 using DG.Tweening;
+using Game.Gameplay.Waves;
 
 namespace Game.UI.Hud
 {
@@ -20,13 +21,17 @@ namespace Game.UI.Hud
         [Header("UI")]
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private Image _progressImage;
+        [SerializeField] private TMP_Text _waveText;
 
         [Header("Animation")]
         [SerializeField] private float _fillTime = 0.2f;
+        [SerializeField] private float _waveUpdateDelay = 0.15f;
 
         private IPlayerLevelService _playerLevel;
+        private IWaveService _waveService;
         private bool _subscribed;
         private Tween _fillTween;
+        private Tween _waveDelayTween;
         private bool _levelUpAnimating;
 
         [Inject]
@@ -34,6 +39,12 @@ namespace Game.UI.Hud
         {
             _playerLevel = playerLevel;
             TrySubscribe();
+        }
+
+        [Inject]
+        public void ConstructWaves(IWaveService waveService)
+        {
+            _waveService = waveService;
         }
 
         private void OnEnable()
@@ -51,6 +62,7 @@ namespace Game.UI.Hud
             }
 
             KillFillTween();
+            KillWaveDelay();
         }
 
         private void TrySubscribe()
@@ -104,6 +116,7 @@ namespace Game.UI.Hud
                 _levelText.text = displayLevel.ToString();
             }
 
+            // Only update wave text when the progress fill reaches full via animations.
             RefreshProgressOnly();
         }
 
@@ -127,6 +140,8 @@ namespace Game.UI.Hud
                 {
                     KillFillTween();
                     _progressImage.fillAmount = target;
+                    if (target >= 0.999f)
+                        UpdateWaveText();
                     return;
                 }
 
@@ -134,7 +149,13 @@ namespace Game.UI.Hud
                 KillFillTween();
                 _fillTween = _progressImage
                     .DOFillAmount(target, _fillTime)
-                    .SetEase(Ease.Linear);
+                    .SetEase(Ease.Linear)
+                    .SetUpdate(true)
+                    .OnComplete(() =>
+                    {
+                        if (target >= 0.999f)
+                            UpdateWaveText();
+                    });
             }
         }
 
@@ -161,9 +182,14 @@ namespace Game.UI.Hud
             float half = _fillTime * 0.5f;
 
             var seq = DOTween.Sequence();
-            seq.Append(_progressImage.DOFillAmount(1f, Mathf.Max(0.01f, half)).SetEase(Ease.Linear));
-            seq.AppendCallback(() => { if (_progressImage != null) _progressImage.fillAmount = 0f; });
-            seq.Append(_progressImage.DOFillAmount(target, Mathf.Max(0.01f, half)).SetEase(Ease.Linear));
+            seq.SetUpdate(true);
+            seq.Append(_progressImage.DOFillAmount(1f, Mathf.Max(0.01f, half)).SetEase(Ease.Linear).SetUpdate(true));
+            seq.AppendCallback(() =>
+            {
+                UpdateWaveText();
+                if (_progressImage != null) _progressImage.fillAmount = 0f;
+            });
+            seq.Append(_progressImage.DOFillAmount(target, Mathf.Max(0.01f, half)).SetEase(Ease.Linear).SetUpdate(true));
             seq.OnComplete(() =>
             {
                 _levelUpAnimating = false;
@@ -171,6 +197,23 @@ namespace Game.UI.Hud
             });
 
             _fillTween = seq;
+        }
+
+        private void UpdateWaveText()
+        {
+            if (_waveText == null || _waveService == null)
+                return;
+            int waveNumber = _waveService.CurrentWaveNumber;
+            int totalWaves = _waveService.TotalWaves;
+            _waveText.text = (waveNumber > 0 && totalWaves > 0) ? ($"{waveNumber}/{totalWaves}") : string.Empty;
+        }
+
+        private void ScheduleWaveUpdate()
+        {
+            KillWaveDelay();
+            float delay = _waveUpdateDelay < 0f ? 0f : _waveUpdateDelay;
+            _waveDelayTween = DOVirtual.DelayedCall(delay, UpdateWaveText, ignoreTimeScale: true)
+                .SetUpdate(true);
         }
 
         private void KillFillTween()
@@ -181,6 +224,15 @@ namespace Game.UI.Hud
                 _fillTween = null;
             }
             _levelUpAnimating = false;
+        }
+
+        private void KillWaveDelay()
+        {
+            if (_waveDelayTween != null && _waveDelayTween.IsActive())
+            {
+                _waveDelayTween.Kill();
+                _waveDelayTween = null;
+            }
         }
     }
 }

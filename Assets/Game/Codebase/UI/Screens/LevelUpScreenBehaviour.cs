@@ -56,8 +56,16 @@ namespace Game.UI.Screens
 
         private void Close()
         {
-            // Destroy this screen instance (root of the screen prefab)
-            Destroy(gameObject);
+            // Close with scale-down if available; otherwise destroy immediately
+            var bounce = GetComponent<ScreenOpenBounce>();
+            if (bounce != null)
+            {
+                bounce.PlayClose();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

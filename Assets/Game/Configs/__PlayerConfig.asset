@@ -17,6 +17,7 @@ MonoBehaviour:
   _baseDamage: 35
   _baseAttackSpeed: 1
   _baseProjectileSpeed: 30
+  _baseProjectileLifetime: 5
   _abilities:
   - _type: 1
     _levels:
@@ -30,4 +31,10 @@ MonoBehaviour:
     - _value: 2
     - _value: 3
     _icon: {fileID: 21300000, guid: 9397c41c47174074bb2fd790704881f5, type: 3}
+  - _type: 3
+    _levels:
+    - _value: 10
+    - _value: 15
+    - _value: 20
+    _icon: {fileID: 21300000, guid: 151618c240a5a6a47ae87cab303b168c, type: 3}
   _experienceToNextLevel: 64000000c80000002c01000090010000f401000058020000bc0200002003000084030000e8030000

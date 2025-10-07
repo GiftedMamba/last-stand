@@ -97,7 +97,15 @@ namespace Game.UI.Screens
                 var screen = GetComponentInParent<LevelUpScreenBehaviour>(true);
                 if (screen != null)
                 {
-                    Destroy(screen.gameObject);
+                    var bounce = screen.GetComponent<ScreenOpenBounce>();
+                    if (bounce != null)
+                    {
+                        bounce.PlayClose();
+                    }
+                    else
+                    {
+                        Destroy(screen.gameObject);
+                    }
                 }
             }
         }
