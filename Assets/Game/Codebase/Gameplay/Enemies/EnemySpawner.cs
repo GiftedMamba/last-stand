@@ -24,8 +24,9 @@ namespace Game.Gameplay.Enemies
 
         [Header("Random Loop Spawning")]
         [SerializeField] private bool _spawnRandomLoop = false;
-        [SerializeField, Min(0.1f)] private float _delaySeconds = 2f;
         [SerializeField, Min(0f)] private float _timeDisplacement = 0f; // per-spawner offset range [0..timeDisplacement]
+
+        private const float DefaultRandomLoopDelaySeconds = 2f;
 
         [Header("Runtime References")]
         [SerializeField] private EnemyRegistry _enemyRegistry;
@@ -205,7 +206,7 @@ namespace Game.Gameplay.Enemies
             // Subsequent spawns use base delay plus per-spawner desync offset
             while (!_stopped)
             {
-                float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
+                float wait = Mathf.Max(0.01f, DefaultRandomLoopDelaySeconds + _desyncOffset);
                 yield return new WaitForSeconds(wait);
 
                 var cfg = _configProvider.GetRandomAny();
@@ -340,7 +341,7 @@ namespace Game.Gameplay.Enemies
                     }
 
                     // wait for pacing delay
-                    float wait = Mathf.Max(0.01f, _delaySeconds + _desyncOffset);
+                    float wait = Mathf.Max(0.01f, (_waveService != null ? _waveService.CurrentSpawnPeriod : DefaultRandomLoopDelaySeconds) + _desyncOffset);
                     yield return new WaitForSeconds(wait);
                 }
                 else

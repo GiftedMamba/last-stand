@@ -7,8 +7,8 @@ namespace Game.Configs
 {
     /// <summary>
     /// ScriptableObject containing a list of waves for a level/session.
-    /// Each wave defines the time it becomes active, the enemy types that can spawn during the wave,
-    /// and an optional boss type for that wave.
+    /// Each wave defines its duration, the enemy types that can spawn during the wave,
+    /// an optional boss type for that wave, and spawn pacing parameters.
     /// </summary>
     [CreateAssetMenu(fileName = "WaveConfig", menuName = "Game/Configs/Wave Config", order = 2)]
     public class WaveConfig : ScriptableObject
@@ -21,7 +21,7 @@ namespace Game.Configs
         [Serializable]
         public class Wave
         {
-            [Tooltip("Game time in seconds when this wave starts or becomes active.")]
+            [Tooltip("Duration of this wave in seconds.")]
             [Min(0f)]
             public float Time;
 
@@ -30,6 +30,15 @@ namespace Game.Configs
 
             [Tooltip("Boss type for this wave (use an enemy type that represents a boss). Unknown means no boss.")]
             public EnemyType BossType = EnemyType.Unknown;
+
+            [Header("Spawn Pacing")]
+            [Tooltip("Spawn period (seconds between spawns) at the start of the wave.")]
+            [Min(0.01f)]
+            public float StartSpawnPeriod = 2f;
+
+            [Tooltip("Spawn period (seconds between spawns) at the end of the wave.")]
+            [Min(0.01f)]
+            public float EndSpawnPeriod = 1f;
         }
     }
 }

@@ -33,6 +33,13 @@ namespace Game.Gameplay.Waves
         bool IsFinished { get; }
 
         /// <summary>
+        /// Current spawn period (seconds between spawns) defined by active wave's pacing,
+        /// linearly interpolated between StartSpawnPeriod and EndSpawnPeriod over the wave's progress.
+        /// Returns a positive value; falls back to a sane default when no active wave.
+        /// </summary>
+        float CurrentSpawnPeriod { get; }
+
+        /// <summary>
         /// Invoked once when all waves are finished.
         /// </summary>
         event Action Finished;

@@ -68,6 +68,26 @@ namespace Game.Gameplay.Waves
                 return waves != null ? waves.Count : 0;
             }
         }
+
+        public float CurrentSpawnPeriod
+        {
+            get
+            {
+                var waves = _config?.Waves;
+                if (waves == null || waves.Count == 0 || _currentWaveIndex < 0 || _finished)
+                {
+                    return 2f; // sane default if no active wave
+                }
+
+                var wave = waves[_currentWaveIndex];
+                float duration = Math.Max(0.01f, wave.Time);
+                float t = Mathf.Clamp01(duration > 0f ? _waveElapsed / duration : 0f);
+                float start = Mathf.Max(0.01f, wave.StartSpawnPeriod);
+                float end = Mathf.Max(0.01f, wave.EndSpawnPeriod);
+                return Mathf.Lerp(start, end, t);
+            }
+        }
+
         public event Action Finished;
 
         public void Start()
