@@ -426,7 +426,7 @@ namespace Game.Gameplay.Abilities
                         if (!cannon.IsReady) continue;
                         cannon.Fire(impactPos =>
                         {
-                            _cameraShake?.StartShake();
+                            _cameraShake?.StartShake(CameraShake.ShakePreset.Weak);
                             ApplySplashDamageAt(impactPos, damage, isPercent, splashRadius);
                             if (impactVfxPrefab != null)
                             {

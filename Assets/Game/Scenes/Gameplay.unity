@@ -11609,6 +11609,12 @@ MonoBehaviour:
     m_RotationOrder: 4
   _space: 0
   _frequency: 35
+  _weakDurationMul: 0.75
+  _weakStrengthMul: 0.75
+  _weakFrequencyMul: 0.85
+  _heavyDurationMul: 1.25
+  _heavyStrengthMul: 1.8
+  _heavyFrequencyMul: 1.15
 --- !u!1 &1684600292
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,13 +18,21 @@ namespace Game.Presentation.Camera
             World
         }
 
+        public enum ShakePreset
+        {
+            Unknown = 0,
+            Weak = 1,
+            Middle = 2,
+            Heavy = 3
+        }
+
         [Header("Target")]
         [Tooltip("If true, will try to use Camera.main transform when starting.")]
         [SerializeField] private bool _useMainCamera = true;
         [Tooltip("Explicit target Transform to shake. If null and UseMainCamera is true, will try Camera.main.")]
         [SerializeField] private Transform _target;
 
-        [Header("Shake Settings")] 
+        [Header("Shake Settings (Baseline: Middle)")] 
         [SerializeField, Min(0f)] private float _delay = 0f;
         [SerializeField, Min(0f)] private float _duration = 0.4f;
         [Tooltip("Strength of the shake along each axis.")]
@@ -40,10 +48,58 @@ namespace Game.Presentation.Camera
         private bool _cachedOriginal;
         private float _shakeEndTime;
 
+        [Header("Preset Multipliers")]
+        [Tooltip("Weak preset multipliers applied to baseline (Middle) values.")]
+        [SerializeField, Min(0f)] private float _weakDurationMul = 0.75f;
+        [SerializeField, Min(0f)] private float _weakStrengthMul = 0.5f;
+        [SerializeField, Min(0f)] private float _weakFrequencyMul = 0.85f;
+
+        [Tooltip("Heavy preset multipliers applied to baseline (Middle) values.")]
+        [SerializeField, Min(0f)] private float _heavyDurationMul = 1.25f;
+        [SerializeField, Min(0f)] private float _heavyStrengthMul = 1.8f;
+        [SerializeField, Min(0f)] private float _heavyFrequencyMul = 1.15f;
+
+        // Returns parameters for the given preset based on the baseline (serialized) settings treated as Middle.
+        private void GetPresetParams(ShakePreset preset, out float duration, out Vector3 strength, out float frequency, out AnimationCurve curve, out ShakeSpace space)
+        {
+            // Baseline = Middle (values from serialized fields)
+            duration = Mathf.Max(0.01f, _duration);
+            strength = _strength;
+            frequency = Mathf.Max(0f, _frequency);
+            curve = _curve;
+            space = _space;
+
+            switch (preset)
+            {
+                case ShakePreset.Unknown:
+                case ShakePreset.Middle:
+                    // keep baseline
+                    break;
+                case ShakePreset.Weak:
+                    duration *= _weakDurationMul;
+                    strength *= _weakStrengthMul;
+                    frequency *= _weakFrequencyMul;
+                    break;
+                case ShakePreset.Heavy:
+                    duration *= _heavyDurationMul;
+                    strength *= _heavyStrengthMul;
+                    frequency *= _heavyFrequencyMul;
+                    break;
+            }
+        }
+
         /// <summary>
-        /// Starts shaking with the configured parameters. If already shaking, extends the shake to cover the new duration.
+        /// Starts shaking using the Middle preset (default). This preserves current usages.
         /// </summary>
         public void StartShake()
+        {
+            StartShake(ShakePreset.Middle);
+        }
+
+        /// <summary>
+        /// Starts shaking with one of the predefined presets. If already shaking, extends the shake to cover the new duration.
+        /// </summary>
+        public void StartShake(ShakePreset preset)
         {
             var t = ResolveTarget();
             if (t == null)
@@ -52,11 +108,13 @@ namespace Game.Presentation.Camera
                 return;
             }
 
-            float end = Time.time + Mathf.Max(0f, _delay) + Mathf.Max(0.01f, _duration);
+            GetPresetParams(preset, out float duration, out Vector3 strength, out float frequency, out AnimationCurve curve, out ShakeSpace space);
+
+            float end = Time.time + Mathf.Max(0f, _delay) + Mathf.Max(0.01f, duration);
             if (_shakeRoutine == null)
             {
                 _shakeEndTime = end;
-                _shakeRoutine = StartCoroutine(ShakeRoutine(t, _delay, _duration, _strength, _curve, _space, _frequency));
+                _shakeRoutine = StartCoroutine(ShakeRoutine(t, _delay, duration, strength, curve, space, frequency));
             }
             else
             {
