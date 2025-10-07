@@ -577,6 +577,8 @@ MonoBehaviour:
   - {fileID: 6210772106707125790}
   - {fileID: 2475066316693827899}
   _restartButton: {fileID: 7804333177809199021}
+  _startDelay: 0.5
+  _betweenStarsDelay: 0.15
 --- !u!114 &6469490507563967296
 MonoBehaviour:
   m_ObjectHideFlags: 0

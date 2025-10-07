@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -21,6 +22,14 @@ namespace Game.UI.Screens
         [Tooltip("Optional. If assigned, clicking will restart the gameplay scene.")]
         [SerializeField] private Button _restartButton;
 
+        [Header("Animation")]
+        [Tooltip("Delay in seconds before the first star appears.")]
+        [SerializeField, Min(0f)] private float _startDelay = 1f;
+        [Tooltip("Delay in seconds between each star appearing.")]
+        [SerializeField, Min(0f)] private float _betweenStarsDelay = 0.2f;
+
+        private Coroutine _revealRoutine;
+
         private void Awake()
         {
             if (_restartButton != null)
@@ -34,8 +43,8 @@ namespace Game.UI.Screens
         }
 
         /// <summary>
-        /// Sets how many stars should be shown (activated). Values less than 0 are clamped to 0.
-        /// Values greater than the number of available stars are clamped to the max.
+        /// Sets how many stars should be shown. Stars will be revealed one-by-one with delays
+        /// configured in the inspector (start delay and between-stars delay).
         /// </summary>
         public void SetStarsCount(int count)
         {
@@ -43,12 +52,44 @@ namespace Game.UI.Screens
                 return;
 
             int toActivate = Mathf.Clamp(count, 0, _stars.Count);
+
+            // Stop any previous reveal animation
+            if (_revealRoutine != null)
+            {
+                StopCoroutine(_revealRoutine);
+                _revealRoutine = null;
+            }
+
+            // Ensure all stars start disabled before revealing
             for (int i = 0; i < _stars.Count; i++)
             {
                 var go = _stars[i];
                 if (go == null) continue;
-                go.SetActive(i < toActivate);
+                go.SetActive(false);
             }
+
+            if (toActivate <= 0)
+                return;
+
+            _revealRoutine = StartCoroutine(RevealStars(toActivate));
+        }
+
+        private IEnumerator RevealStars(int count)
+        {
+            if (_startDelay > 0f)
+                yield return new WaitForSecondsRealtime(_startDelay);
+
+            for (int i = 0; i < count; i++)
+            {
+                var go = _stars[i];
+                if (go != null)
+                    go.SetActive(true);
+
+                if (i < count - 1 && _betweenStarsDelay > 0f)
+                    yield return new WaitForSecondsRealtime(_betweenStarsDelay);
+            }
+
+            _revealRoutine = null;
         }
 
         public void Restart()

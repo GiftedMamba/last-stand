@@ -4347,7 +4347,6 @@ MonoBehaviour:
   _autoCount: 1
   _spawnRadius: 0
   _spawnRandomLoop: 1
-  _delaySeconds: 3
   _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &711211743
@@ -12130,7 +12129,6 @@ MonoBehaviour:
   _autoCount: 1
   _spawnRadius: 0
   _spawnRandomLoop: 1
-  _delaySeconds: 3
   _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!1 &1763668744
@@ -12958,7 +12956,6 @@ MonoBehaviour:
   _autoCount: 1
   _spawnRadius: 0
   _spawnRandomLoop: 1
-  _delaySeconds: 3
   _timeDisplacement: 1.5
   _enemyRegistry: {fileID: 594568889}
 --- !u!4 &1903687902

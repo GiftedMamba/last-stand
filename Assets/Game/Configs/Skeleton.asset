@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd93b394ae0c4126970d11964a6bc7f5, type: 3}
   m_Name: Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
-  _enemyPrefab: {fileID: 8115316031295193917, guid: 9f38db09a80a31b46bef8551cf95809b, type: 3}
+  _enemyPrefab: {fileID: 242998835295394328, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
   _explosionPrefab: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   _type: 2
   _maxHp: 100
@@ -21,5 +21,5 @@ MonoBehaviour:
   _dpsToSpot: 8
   _explodeDamageToTower: 10
   _isBoss: 0
-  _xpReward: 25
+  _xpReward: 15
   _aimPointYOffset: 1
