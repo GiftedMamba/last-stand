@@ -26,10 +26,12 @@ namespace Game.Gameplay.Player
         [SerializeField, Min(0f)] private float _maxTargetRange = 50f;
         [SerializeField, Min(0.01f)] private float _hitRadius = 0.25f;
 
-        private float _cooldown;
         private Enemy _pendingTarget;
         private static readonly int ShootHash = Animator.StringToHash("Shoot");
         private const string ShootName = "Shoot"; // used for state crossfade fallback
+        
+        // Attack state: ready-to-attack toggled by animation events (AttackEnd)
+        private bool _readyToAttack = true;
 
         // Animator setup cache
         private bool _animSetupChecked;
@@ -138,9 +140,8 @@ namespace Game.Gameplay.Player
                 _warnedUninitialized = false;
             }
 
-            // Cooldown handling - attack continuously by cooldown regardless of target death
-            _cooldown -= Time.deltaTime;
-            if (_cooldown > 0f)
+            // Attack readiness is controlled by animation event AttackEnd
+            if (!_readyToAttack)
             {
                 return;
             }
@@ -182,11 +183,11 @@ namespace Game.Gameplay.Player
                 }
             }
 
-            // Attack: trigger animation and defer actual firing to animation event
+            // Attack: trigger animation and defer actual firing to animation events (Shoot/AttackEnd)
             float atkMul = GetAttackSpeedMultiplierFromAbilities();
             if (atkMul <= 0f) atkMul = 1f;
-            float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed * atkMul);
-            _cooldown = 1f / atkSpeed; // start cooldown immediately when we commit to an attack
+
+            _readyToAttack = false;
 
             if (_animator != null)
             {
@@ -219,8 +220,9 @@ namespace Game.Gameplay.Player
             }
             else
             {
-                // Fallback if animator is not assigned: fire immediately
+                // Fallback if animator is not assigned: fire immediately and become ready again
                 FireAt(closest);
+                _readyToAttack = true; // simulate AttackEnd
             }
         }
 
@@ -241,13 +243,19 @@ namespace Game.Gameplay.Player
             }
 
             _pendingTarget = null; // clear either way to avoid repeated shots
+        }
 
-            // Restore animator speed after attack event processed
+        // Animation Event handler to be called at the end of the attack animation.
+        // Add an animation event named "AttackEnd" to signal the player can attack again.
+        public void AttackEnd()
+        {
+            // Restore animator speed when attack fully ends
             if (_animator != null && _animSpeedOverridden)
             {
                 _animator.speed = _storedAnimatorSpeed;
                 _animSpeedOverridden = false;
             }
+            _readyToAttack = true;
         }
 
         private int GetSplitShotCountFromAbilities()
