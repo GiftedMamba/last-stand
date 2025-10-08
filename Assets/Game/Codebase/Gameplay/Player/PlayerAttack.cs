@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
+using Game.Core.Player;
 using Game.Gameplay.Combat;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.Abilities;
@@ -53,11 +54,18 @@ namespace Game.Gameplay.Player
 
         // Injected hero ability service (optional). When available, we read current levels from here.
         private IHeroAbilityService _heroAbilityService;
+        private IPlayerLevelService _playerLevel;
 
         [Inject]
         public void Construct(IHeroAbilityService heroAbilityService)
         {
             _heroAbilityService = heroAbilityService;
+        }
+
+        [Inject]
+        public void Construct(IPlayerLevelService playerLevel)
+        {
+            _playerLevel = playerLevel;
         }
 
         public void SetAbilityLevel(HeroAbilityType type, int level)
@@ -423,7 +431,13 @@ namespace Game.Gameplay.Player
             int[] angleOrder = { 0, -15, 15, -35, 35 };
 
             float speed = Mathf.Max(0f, _config.BaseProjectileSpeed);
-            float baseDamage = Mathf.Max(0f, _config.BaseDamage);
+
+            // Damage scales with level: Base + (Level-1) * DamagePerLevel
+            int level = _playerLevel != null ? _playerLevel.Level : 1;
+            if (level < 1) level = 1;
+            float perLevel = _config != null ? Mathf.Max(0f, _config.DamagePerLevel) : 0f;
+            float baseDamage = Mathf.Max(0f, _config.BaseDamage + (level - 1) * perLevel);
+
             int pierceCount = GetPierceCountFromAbilities();
 
             // Crit parameters

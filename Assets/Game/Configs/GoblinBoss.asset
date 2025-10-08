@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd93b394ae0c4126970d11964a6bc7f5, type: 3}
-  m_Name: Shaman Goblin
+  m_Name: GoblinBoss
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 0}
   _explosionPrefab: {fileID: 0}
-  _type: 7
-  _maxHp: 180
-  _armor: 1
-  _moveSpeed: 2.3
-  _dpsToSpot: 6
+  _type: 6
+  _maxHp: 1600
+  _armor: 6
+  _moveSpeed: 2.2
+  _dpsToSpot: 25
   _explodeDamageToTower: 10
-  _isBoss: 0
+  _isBoss: 1
   _xpReward: 1
   _aimPointYOffset: 1

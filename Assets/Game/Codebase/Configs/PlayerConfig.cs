@@ -35,6 +35,9 @@ namespace Game.Configs
         [Tooltip("Each entry is the experience required to reach the next level from the current level. Index 0 = XP to go from level 1 to level 2, and so on.")]
         [SerializeField] private int[] _experienceToNextLevel = new int[0];
 
+        [Tooltip("Flat damage added per level above level 1. Total Damage = BaseDamage + (Level-1) * DamagePerLevel")] 
+        [SerializeField, Min(0f)] private float _damagePerLevel = 0f;
+
         public GameObject PlayerPrefab => _playerPrefab;
         public GameObject ProjectilePrefab => _projectilePrefab;
         public float BaseDamage => _baseDamage;
@@ -48,6 +51,11 @@ namespace Game.Configs
         /// Ordered list of XP requirements to advance from level N to N+1.
         /// </summary>
         public IReadOnlyList<int> ExperienceToNextLevel => _experienceToNextLevel;
+
+        /// <summary>
+        /// Flat damage added per level above level 1.
+        /// </summary>
+        public float DamagePerLevel => _damagePerLevel;
 
 #if UNITY_EDITOR
         private void OnValidate()
