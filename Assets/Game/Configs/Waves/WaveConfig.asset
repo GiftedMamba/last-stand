@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.WaveConfig
   TimeBetweenWaves: 10
   _waves:
-  - Time: 60
+  - Time: 10
     EnemyTypes: 0200000005000000
     BossType: 8
     StartSpawnPeriod: 5

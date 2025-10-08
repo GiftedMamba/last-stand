@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: SkeletonBoss
   m_EditorClassIdentifier: Assembly-CSharp::Game.Configs.EnemyConfig
   _enemyPrefab: {fileID: 4040049200811826080, guid: e48dcb2e2349c5547a3a31126daf973f, type: 3}
-  _explosionPrefab: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
+  _explosionPrefab: {fileID: 1980635251418728564, guid: d25dc47c1d1c29b4ea386c9b47aa2ff9, type: 3}
   _type: 8
-  _maxHp: 1200
+  _maxHp: 1000
   _armor: 6
   _moveSpeed: 1.2
   _dpsToSpot: 50

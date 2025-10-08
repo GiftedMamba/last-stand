@@ -1,4 +1,5 @@
-﻿using Game.Configs;
+﻿using System.Collections.Generic;
+using Game.Configs;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.Spots;
 using Game.Gameplay.Abilities;
@@ -65,12 +66,23 @@ namespace Game.Gameplay.Towers
                 var allTargets = TowerTarget.All;
                 if (allTargets != null && allTargets.Count > 0)
                 {
+                    // Snapshot tower healths to avoid mutating the underlying collection while applying damage
+                    var targetsToDamage = new List<TowerHealth>(allTargets.Count);
                     for (int i = 0; i < allTargets.Count; i++)
                     {
                         var target = allTargets[i];
                         if (target == null) continue;
-                        // Try get a TowerHealth component linked to this target
                         var th = target.GetComponent<TowerHealth>() ?? target.GetComponentInParent<TowerHealth>();
+                        if (th != null)
+                        {
+                            targetsToDamage.Add(th);
+                        }
+                    }
+
+                    // Apply damage after snapshot so removals from TowerTarget list don't affect iteration
+                    for (int i = 0; i < targetsToDamage.Count; i++)
+                    {
+                        var th = targetsToDamage[i];
                         if (th != null)
                         {
                             th.TakeDamagePiercingShield(actualDamage);
