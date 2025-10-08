@@ -1000,6 +1000,7 @@ GameObject:
   - component: {fileID: 2631433900394877638}
   - component: {fileID: 3562378612963268755}
   - component: {fileID: -3591719647381842150}
+  - component: {fileID: 4406924652986384801}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1061,9 +1062,27 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: ac37819d8742eaf47859637466abccb0, type: 2}
   _enemyRegistry: {fileID: 0}
   _firePoint: {fileID: 0}
+  _animator: {fileID: 3562378612963268755}
   _projectilePrefabOverride: {fileID: 0}
   _maxTargetRange: 0
   _hitRadius: 0.25
+--- !u!114 &4406924652986384801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6931717683036688701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8664c4b4b05c4e44acbcd2fced241c21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Player.PlayerTargetSelector
+  _playerAttack: {fileID: 0}
+  _camera: {fileID: 0}
+  _enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &7187380687623057673
 GameObject:
   m_ObjectHideFlags: 0

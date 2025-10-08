@@ -28,6 +28,7 @@ namespace Game.Gameplay.Player
         [SerializeField, Min(0.01f)] private float _hitRadius = 0.25f;
 
         private Enemy _pendingTarget;
+        private Enemy _manualTarget; // set via input to override auto targeting
         private static readonly int ShootHash = Animator.StringToHash("Shoot");
         private const string ShootName = "Shoot"; // used for state crossfade fallback
         
@@ -154,10 +155,39 @@ namespace Game.Gameplay.Player
                 return;
             }
 
-            // Acquire target
+            // Acquire target (prefer manual override if valid and in range)
             var origin = _firePoint != null ? _firePoint.position : transform.position;
-            var closest = _enemyRegistry.FindClosest(origin);
-            if (closest == null || closest.IsDead)
+            Enemy chosen = null;
+
+            // Validate manual target
+            if (_manualTarget != null)
+            {
+                if (_manualTarget.IsDead)
+                {
+                    _manualTarget = null;
+                }
+                else if (_maxTargetRange > 0f)
+                {
+                    float sqr = (origin - _manualTarget.transform.position).sqrMagnitude;
+                    float maxSqr = _maxTargetRange * _maxTargetRange;
+                    if (sqr > maxSqr)
+                    {
+                        // out of range -> clear override so auto-targeting can proceed
+                        _manualTarget = null;
+                    }
+                }
+            }
+
+            if (_manualTarget != null)
+            {
+                chosen = _manualTarget;
+            }
+            else
+            {
+                chosen = _enemyRegistry.FindClosest(origin);
+            }
+
+            if (chosen == null || chosen.IsDead)
             {
                 if (!_loggedNoTarget)
                 {
@@ -171,10 +201,10 @@ namespace Game.Gameplay.Player
                 _loggedNoTarget = false;
             }
 
-            // Optional range check
+            // Optional range check for chosen target
             if (_maxTargetRange > 0f)
             {
-                float sqr = (origin - closest.transform.position).sqrMagnitude;
+                float sqr = (origin - chosen.transform.position).sqrMagnitude;
                 float maxSqr = _maxTargetRange * _maxTargetRange;
                 if (sqr > maxSqr)
                 {
@@ -199,7 +229,7 @@ namespace Game.Gameplay.Player
 
             if (_animator != null)
             {
-                _pendingTarget = closest;
+                _pendingTarget = chosen;
 
                 // Adjust animator speed so animation length scales inversely with multiplier
                 float desiredAnimSpeed = 1f / Mathf.Max(0.0001f, atkMul);
@@ -229,7 +259,7 @@ namespace Game.Gameplay.Player
             else
             {
                 // Fallback if animator is not assigned: fire immediately and become ready again
-                FireAt(closest);
+                FireAt(chosen);
                 _readyToAttack = true; // simulate AttackEnd
             }
         }
@@ -237,12 +267,27 @@ namespace Game.Gameplay.Player
         // Animation Event handler. Add an animation event named "Shoot" in the attack animation to call this.
         public void Shoot()
         {
-            // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire a new closest target.
+            // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire target (prefer manual override).
             var origin = _firePoint != null ? _firePoint.position : transform.position;
             var target = _pendingTarget;
             if (target == null || target.IsDead)
             {
-                target = _enemyRegistry != null ? _enemyRegistry.FindClosest(origin) : null;
+                // Validate manual override first
+                if (_manualTarget != null)
+                {
+                    bool valid = !_manualTarget.IsDead;
+                    if (valid && _maxTargetRange > 0f)
+                    {
+                        float sqr = (origin - _manualTarget.transform.position).sqrMagnitude;
+                        float maxSqr = _maxTargetRange * _maxTargetRange;
+                        if (sqr > maxSqr) valid = false;
+                    }
+                    if (valid)
+                        target = _manualTarget;
+                }
+
+                if (target == null && _enemyRegistry != null)
+                    target = _enemyRegistry.FindClosest(origin);
             }
 
             if (target != null && !target.IsDead)
@@ -485,6 +530,17 @@ namespace Game.Gameplay.Player
                     proj.SetMaxLifetime(Mathf.Max(0f, _config.BaseProjectileLifetime));
                 }
             }
+        }
+
+        // Public API: allow external components (e.g., input selectors) to set/clear manual target override
+        public void SetManualTarget(Game.Gameplay.Enemies.Enemy enemy)
+        {
+            _manualTarget = enemy;
+        }
+
+        public void ClearManualTarget()
+        {
+            _manualTarget = null;
         }
     }
 }
