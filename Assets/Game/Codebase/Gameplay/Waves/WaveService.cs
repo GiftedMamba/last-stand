@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
 using Game.Gameplay.Enemies;
-using Game.Gameplay.GameOver;
 using Game.UI.Screens;
 using UnityEngine;
 using VContainer.Unity;
@@ -18,7 +17,6 @@ namespace Game.Gameplay.Waves
     {
         private readonly WaveConfig _config;
         private readonly IScreenService _screenService;
-        private readonly GameOverController _gameOverController;
         private readonly Game.Gameplay.Enemies.EnemyRegistry _enemyRegistry;
 
         private readonly List<EnemyType> _allowedTypes = new();
@@ -40,11 +38,10 @@ namespace Game.Gameplay.Waves
         // Early clear state (when all enemies are dead during an active wave)
         private float _clearElapsed;
 
-        public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController, Game.Gameplay.Enemies.EnemyRegistry enemyRegistry)
+        public WaveService(WaveConfig config, IScreenService screenService, Game.Gameplay.Enemies.EnemyRegistry enemyRegistry)
         {
             _config = config;
             _screenService = screenService;
-            _gameOverController = gameOverController;
             _enemyRegistry = enemyRegistry;
         }
 
@@ -376,12 +373,9 @@ namespace Game.Gameplay.Waves
                     var win = instance.GetComponentInChildren<WinScreenBehaviour>(true);
                     if (win != null)
                     {
-                        int stars = 0;
-                        if (_gameOverController != null)
-                        {
-                            stars = Mathf.Max(0, _gameOverController.AliveTowersCount);
-                        }
-                        win.SetStarsCount(stars);
+                        // Stars number is determined by remaining towers; not available here without creating a DI cycle.
+                        // Set to 0 here; actual presentation can adjust if needed.
+                        win.SetStarsCount(0);
                     }
                     else
                     {
