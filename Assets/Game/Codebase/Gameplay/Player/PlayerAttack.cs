@@ -267,26 +267,14 @@ namespace Game.Gameplay.Player
         // Animation Event handler. Add an animation event named "Shoot" in the attack animation to call this.
         public void Shoot()
         {
-            // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire target (prefer manual override).
+            // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire target automatically.
+            // IMPORTANT: Do not use manual target here. Manual selection should only take effect on the NEXT attack cycle.
             var origin = _firePoint != null ? _firePoint.position : transform.position;
             var target = _pendingTarget;
             if (target == null || target.IsDead)
             {
-                // Validate manual override first
-                if (_manualTarget != null)
-                {
-                    bool valid = !_manualTarget.IsDead;
-                    if (valid && _maxTargetRange > 0f)
-                    {
-                        float sqr = (origin - _manualTarget.transform.position).sqrMagnitude;
-                        float maxSqr = _maxTargetRange * _maxTargetRange;
-                        if (sqr > maxSqr) valid = false;
-                    }
-                    if (valid)
-                        target = _manualTarget;
-                }
-
-                if (target == null && _enemyRegistry != null)
+                // Only auto-select a target; manual override is deferred until after AttackEnd
+                if (_enemyRegistry != null)
                     target = _enemyRegistry.FindClosest(origin);
             }
 
