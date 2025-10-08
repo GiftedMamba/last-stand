@@ -9,6 +9,11 @@ namespace Game.Gameplay.Abilities
     public interface IGlobalAbilityExecutor
     {
         /// <summary>
+        /// Indicates if the Shoied (Shield) ability is currently active.
+        /// </summary>
+        bool IsShoiedActive { get; }
+        
+        /// <summary>
         /// Stops all enemies for the specified duration (in seconds) and immediately deals damage once.
         /// Consecutive calls extend the stop duration if the new end time is later.
         /// </summary>

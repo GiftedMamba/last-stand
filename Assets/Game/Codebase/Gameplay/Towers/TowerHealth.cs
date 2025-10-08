@@ -61,6 +61,27 @@ namespace Game.Gameplay.Towers
             }
         }
 
+        /// <summary>
+        /// Apply damage ignoring the invulnerability flag (used for boss explosion piercing shield).
+        /// </summary>
+        public void TakeDamagePiercingShield(int amount)
+        {
+            if (amount <= 0 || IsDead) return;
+            int prev = _currentHp;
+            _currentHp = Mathf.Max(0, _currentHp - amount);
+            OnDamaged?.Invoke(prev - _currentHp, _currentHp);
+
+            GameLogger.Log($"TowerHealth: Took {amount} damage (piercing shield). HP {_currentHp}/{_maxHp}.");
+
+            if (_currentHp == 0)
+            {
+                OnDied?.Invoke();
+                // Destroy the tower GameObject when HP reaches zero
+                Destroy(gameObject);
+                // Later: dispatch domain event or inform a game over service
+            }
+        }
+
         public void Heal(int amount)
         {
             if (amount <= 0 || IsDead) return;

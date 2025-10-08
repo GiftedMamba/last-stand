@@ -45,6 +45,8 @@ namespace Game.Gameplay.Abilities
         private GameObject _shoiedVfxPrefab;
         private readonly HashSet<TowerHealth> _shoiedVfxApplied = new HashSet<TowerHealth>();
 
+        public bool IsShoiedActive => Time.time < _shoiedUntil;
+
         [Inject]
         public void Construct(CameraShake cameraShake)
         {

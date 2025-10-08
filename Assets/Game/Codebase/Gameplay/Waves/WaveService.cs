@@ -28,10 +28,17 @@ namespace Game.Gameplay.Waves
         private bool _finished;
         private bool _loggedWin;
         private bool _waitForClear;
+        
+        // Win screen delay after all waves done (uses last wave's ClearDelaySeconds)
+        private float _winDelaySeconds;
+        private float _winDelayElapsed;
 
         // Inter-wave timeout state
         private bool _betweenWaves;
         private float _betweenElapsed;
+
+        // Early clear state (when all enemies are dead during an active wave)
+        private float _clearElapsed;
 
         public WaveService(WaveConfig config, IScreenService screenService, GameOverController gameOverController, Game.Gameplay.Enemies.EnemyRegistry enemyRegistry)
         {
@@ -115,7 +122,10 @@ namespace Game.Gameplay.Waves
             _finished = false;
             _loggedWin = false;
             _waitForClear = false;
+            _winDelaySeconds = 0f;
+            _winDelayElapsed = 0f;
             _allowedTypes.Clear();
+            _clearElapsed = 0f;
 
             // Immediately enter first wave if any
             var waves = _config?.Waves;
@@ -142,9 +152,18 @@ namespace Game.Gameplay.Waves
                     int alive = list != null ? list.Count : 0;
                     if (alive <= 0)
                     {
-                        // All enemies cleared: show win now
-                        ShowWinOnce();
-                        _waitForClear = false;
+                        // Wait additional delay before showing win, according to last wave ClearDelaySeconds
+                        _winDelayElapsed += UnityEngine.Time.deltaTime;
+                        if (_winDelayElapsed >= Mathf.Max(0f, _winDelaySeconds))
+                        {
+                            ShowWinOnce();
+                            _waitForClear = false;
+                        }
+                    }
+                    else
+                    {
+                        // Enemies reappeared: reset wait timer
+                        _winDelayElapsed = 0f;
                     }
                 }
                 return;
@@ -160,6 +179,32 @@ namespace Game.Gameplay.Waves
             else
             {
                 _waveElapsed += dt;
+
+                // Track early-clear timer: when no alive enemies are present during the wave
+                if (_enemyRegistry != null)
+                {
+                    var list = _enemyRegistry.Enemies;
+                    int aliveNonDead = 0;
+                    if (list != null)
+                    {
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            var e = list[i];
+                            if (e != null && !e.IsDead)
+                                aliveNonDead++;
+                        }
+                    }
+
+                    if (aliveNonDead <= 0)
+                        _clearElapsed += dt;
+                    else
+                        _clearElapsed = 0f;
+                }
+                else
+                {
+                    // Without a registry, we cannot know; disable early-clear timer
+                    _clearElapsed = 0f;
+                }
             }
 
             AdvanceIfNeeded();
@@ -197,8 +242,25 @@ namespace Game.Gameplay.Waves
                 return;
             }
 
+            // Early clear check: if no enemies for configured delay, end wave early
+            var currentWave = waves[_currentWaveIndex];
+            float clearDelay = Mathf.Max(0f, currentWave.ClearDelaySeconds);
+            if (clearDelay > 0f && _clearElapsed >= clearDelay)
+            {
+                int nextIndexEarly = _currentWaveIndex + 1;
+                if (nextIndexEarly < waves.Count)
+                {
+                    EnterBetweenWaves();
+                }
+                else
+                {
+                    CompleteOnce();
+                }
+                return;
+            }
+
             // Each wave's Time is treated as its duration
-            float currentDuration = Math.Max(0.01f, waves[_currentWaveIndex].Time);
+            float currentDuration = Math.Max(0.01f, currentWave.Time);
             if (_waveElapsed >= currentDuration)
             {
                 int nextIndex = _currentWaveIndex + 1;
@@ -218,6 +280,7 @@ namespace Game.Gameplay.Waves
         {
             _betweenWaves = true;
             _betweenElapsed = 0f;
+            _clearElapsed = 0f;
             _allowedTypes.Clear(); // pause spawns during intermission
         }
 
@@ -228,6 +291,7 @@ namespace Game.Gameplay.Waves
 
             _currentWaveIndex = index;
             _waveElapsed = 0f;
+            _clearElapsed = 0f;
             _allowedTypes.Clear();
 
             var waves = _config?.Waves;
@@ -274,9 +338,21 @@ namespace Game.Gameplay.Waves
             if (_enemyRegistry != null && _enemyRegistry.Enemies != null)
                 alive = _enemyRegistry.Enemies.Count;
 
-            if (alive > 0)
+            // Determine additional delay for WinScreen based on last wave's ClearDelaySeconds
+            _winDelaySeconds = 0f;
+            _winDelayElapsed = 0f;
+            var waves = _config?.Waves;
+            if (waves != null && waves.Count > 0)
             {
-                // Defer showing win screen until enemies are cleared
+                int idx = _currentWaveIndex;
+                if (idx < 0) idx = waves.Count - 1; // fallback to last
+                idx = Mathf.Clamp(idx, 0, waves.Count - 1);
+                _winDelaySeconds = Mathf.Max(0f, waves[idx].ClearDelaySeconds);
+            }
+
+            if (alive > 0 || _winDelaySeconds > 0f)
+            {
+                // Defer showing win screen until enemies are cleared and delay has elapsed
                 _waitForClear = true;
             }
             else

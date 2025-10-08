@@ -10,5 +10,6 @@
         SplitShot = 1,
         Pierce = 2,
         Crit = 3,
+        AttackSpeed = 4,
     }
 }

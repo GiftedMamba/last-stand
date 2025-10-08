@@ -43,6 +43,11 @@ namespace Game.Configs
             [Tooltip("Spawn period (seconds between spawns) at the end of the wave.")]
             [Min(0.01f)]
             public float EndSpawnPeriod = 1f;
+
+            [Header("Early Clear")]
+            [Tooltip("When all enemies are dead before the wave duration ends, wait this delay before ending the wave early. 0 disables early clear.")]
+            [Min(0f)]
+            public float ClearDelaySeconds = 3f;
         }
     }
 }

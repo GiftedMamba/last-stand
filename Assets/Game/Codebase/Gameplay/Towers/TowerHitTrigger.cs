@@ -1,6 +1,9 @@
 ﻿using Game.Configs;
 using Game.Gameplay.Enemies;
+using Game.Gameplay.Spots;
+using Game.Gameplay.Abilities;
 using UnityEngine;
+using VContainer;
 
 namespace Game.Gameplay.Towers
 {
@@ -13,6 +16,13 @@ namespace Game.Gameplay.Towers
     public sealed class TowerHitTrigger : MonoBehaviour
     {
         private TowerHealth _towerHealth;
+        private IGlobalAbilityExecutor _abilityExecutor;
+
+        [Inject]
+        public void Construct(IGlobalAbilityExecutor abilityExecutor)
+        {
+            _abilityExecutor = abilityExecutor;
+        }
 
         private void Awake()
         {
@@ -43,15 +53,44 @@ namespace Game.Gameplay.Towers
                 dmg = Mathf.Max(0, cfg.ExplodeDamageToTower);
             }
 
-            if (_towerHealth == null)
+            // Boss special rule: on death/explosion, damage all towers; half damage if shield active
+            if (cfg != null && cfg.IsBoss && dmg > 0)
             {
-                // Attempt to locate dynamically in case attached later
-                _towerHealth = GetComponent<TowerHealth>() ?? GetComponentInParent<TowerHealth>();
-            }
+                int actualDamage = dmg;
+                if (_abilityExecutor != null && _abilityExecutor.IsShoiedActive)
+                {
+                    actualDamage = Mathf.CeilToInt(dmg * 0.5f);
+                }
 
-            if (_towerHealth != null && dmg > 0)
+                var allTargets = TowerTarget.All;
+                if (allTargets != null && allTargets.Count > 0)
+                {
+                    for (int i = 0; i < allTargets.Count; i++)
+                    {
+                        var target = allTargets[i];
+                        if (target == null) continue;
+                        // Try get a TowerHealth component linked to this target
+                        var th = target.GetComponent<TowerHealth>() ?? target.GetComponentInParent<TowerHealth>();
+                        if (th != null)
+                        {
+                            th.TakeDamagePiercingShield(actualDamage);
+                        }
+                    }
+                }
+            }
+            else
             {
-                _towerHealth.TakeDamage(dmg);
+                // Non-boss default behavior: damage only this tower
+                if (_towerHealth == null)
+                {
+                    // Attempt to locate dynamically in case attached later
+                    _towerHealth = GetComponent<TowerHealth>() ?? GetComponentInParent<TowerHealth>();
+                }
+
+                if (_towerHealth != null && dmg > 0)
+                {
+                    _towerHealth.TakeDamage(dmg);
+                }
             }
 
             // Spawn enemy-specific explosion prefab if assigned
