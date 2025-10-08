@@ -106,6 +106,9 @@ MonoBehaviour:
   _config: {fileID: 11400000, guid: 8f8da936990d30547854408d12409ee4, type: 2}
   _currentHp: 0
   _animator: {fileID: 0}
+  _skinnedMeshRenderer: {fileID: 0}
+  _flashDuration: 0.15
+  _flashPower: 2
 --- !u!136 &5733036158280320520
 CapsuleCollider:
   m_ObjectHideFlags: 0

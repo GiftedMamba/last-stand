@@ -71,11 +71,15 @@ PrefabInstance:
     - target: {fileID: 1885239078715366301, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 1af2fde095144a745836983411db44d9, type: 2}
+      objectReference: {fileID: 2100000, guid: 9c50ca7220b133b43a65021d4e442397, type: 2}
     - target: {fileID: 2632222808198509559, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
       propertyPath: _config
       value: 
       objectReference: {fileID: 11400000, guid: 060aa7d86c28dc446885fdbff20ef71a, type: 2}
+    - target: {fileID: 2632222808198509559, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
+      propertyPath: _skinnedMeshRenderer
+      value: 
+      objectReference: {fileID: 2407133889196939813}
     - target: {fileID: 7227414730154006981, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
       propertyPath: m_Controller
       value: 
@@ -85,3 +89,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
+--- !u!137 &2407133889196939813 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1885239078715366301, guid: 416f12818a1efa941936f357eda00bc0, type: 3}
+  m_PrefabInstance: {fileID: 4273473428182319544}
+  m_PrefabAsset: {fileID: 0}

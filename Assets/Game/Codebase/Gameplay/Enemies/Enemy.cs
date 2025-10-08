@@ -20,12 +20,27 @@ namespace Game.Gameplay.Enemies
 
         [Header("Presentation")]
         [SerializeField] private Animator _animator;
+        [Tooltip("SkinnedMeshRenderer whose material will be manipulated for hit flash.")]
+        [SerializeField] private SkinnedMeshRenderer _skinnedMeshRenderer;
+        [Tooltip("How long the hit flash lasts, seconds.")]
+        [SerializeField] [Min(0f)] private float _flashDuration = 0.15f;
+        [Tooltip("Peak intensity of the flash written to _FlashAmount shader property.")]
+        [SerializeField] [Min(0f)] private float _flashPower = 1f;
 
         private bool _isDying;
 
         // Animator parameter IDs
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
         private static readonly int DeadHash = Animator.StringToHash("Dead");
+
+        // Shader property IDs
+        private static readonly int FlashAmountId = Shader.PropertyToID("_FlashAmount");
+
+        // Flash state
+        private float _flashTimer;
+
+        // Non-serialized runtime material instance extracted from SkinnedMeshRenderer
+        private Material _material;
 
         public EnemyConfig Config => _config;
         public int CurrentHp => _currentHp;
@@ -45,6 +60,25 @@ namespace Game.Gameplay.Enemies
             _agent = GetComponent<NavMeshAgent>();
             if (_animator == null)
                 TryGetComponent(out _animator);
+
+            // Ensure we have a unique material instance from the SkinnedMeshRenderer
+            if (_skinnedMeshRenderer == null)
+            {
+                TryGetComponent(out _skinnedMeshRenderer);
+                if (_skinnedMeshRenderer == null)
+                    _skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
+            }
+            if (_skinnedMeshRenderer != null)
+            {
+                // material returns an instance (not sharedMaterial)
+                _material = _skinnedMeshRenderer.material;
+            }
+
+            // Initialize flash to zero
+            if (_material != null)
+            {
+                _material.SetFloat(FlashAmountId, 0f);
+            }
         }
 
         private void Start()
@@ -98,6 +132,19 @@ namespace Game.Gameplay.Enemies
                 float speed01 = Mathf.Clamp01(vel / max);
                 // small damping for smoother transitions
                 _animator.SetFloat(SpeedHash, speed01, 0.1f, Time.deltaTime);
+            }
+
+            // Flash effect: lerp _FlashAmount back to 0 over _flashDuration
+            if (_flashTimer > 0f && _flashDuration > 0f && _material != null)
+            {
+                _flashTimer -= Time.deltaTime;
+                float t = Mathf.Clamp01(1f - (_flashTimer / _flashDuration));
+                float value = Mathf.Lerp(_flashPower, 0f, t);
+                _material.SetFloat(FlashAmountId, value);
+                if (_flashTimer <= 0f)
+                {
+                    _material.SetFloat(FlashAmountId, 0f);
+                }
             }
         }
 
@@ -159,6 +206,13 @@ namespace Game.Gameplay.Enemies
             int dealt = Mathf.Max(0, prev - _currentHp);
             OnDamaged?.Invoke(dealt, _currentHp);
 
+            // Trigger flash on hit
+            if (_material != null && _flashPower > 0f && _flashDuration > 0f)
+            {
+                _flashTimer = _flashDuration;
+                _material.SetFloat(FlashAmountId, _flashPower);
+            }
+
             if (_currentHp <= 0)
                 Die();
         }
@@ -211,6 +265,13 @@ namespace Game.Gameplay.Enemies
                 // ensure locomotion settles to idle
                 _animator.SetFloat(SpeedHash, 0f);
                 _animator.SetTrigger(DeadHash);
+            }
+
+            // Reset flash on death
+            _flashTimer = 0f;
+            if (_material != null)
+            {
+                _material.SetFloat(FlashAmountId, 0f);
             }
 
             // Delay destruction to allow animation to finish
