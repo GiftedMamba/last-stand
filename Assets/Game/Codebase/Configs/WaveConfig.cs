@@ -23,14 +23,21 @@ namespace Game.Configs
         public IReadOnlyList<Wave> Waves => _waves;
 
         [Serializable]
+        public struct WeightedEnemy
+        {
+            public EnemyType Type;
+            [Min(0)] public int Weight;
+        }
+
+        [Serializable]
         public class Wave
         {
             [Tooltip("Duration of this wave in seconds.")]
             [Min(0f)]
             public float Time;
 
-            [Tooltip("Enemy types that may spawn during this wave.")]
-            public List<EnemyType> EnemyTypes = new();
+            [Tooltip("Enemy types and their spawn weights for this wave.")]
+            public List<WeightedEnemy> EnemyTypes = new();
 
             [Tooltip("Boss type for this wave (use an enemy type that represents a boss). Unknown means no boss.")]
             public EnemyType BossType = EnemyType.Unknown;

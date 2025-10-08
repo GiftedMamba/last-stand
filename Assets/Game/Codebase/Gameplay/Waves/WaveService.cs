@@ -20,6 +20,7 @@ namespace Game.Gameplay.Waves
         private readonly Game.Gameplay.Enemies.EnemyRegistry _enemyRegistry;
 
         private readonly List<EnemyType> _allowedTypes = new();
+        private readonly List<WaveConfig.WeightedEnemy> _currentWeighted = new();
         private int _currentWaveIndex = -1;
         private float _elapsed;
         private float _waveElapsed;
@@ -109,6 +110,35 @@ namespace Game.Gameplay.Waves
 
         public event Action Finished;
 
+                public EnemyType GetRandomAllowedType()
+                {
+                    if (_currentWeighted == null || _currentWeighted.Count == 0)
+                        return EnemyType.Unknown;
+
+                    // Compute total weight
+                    int total = 0;
+                    for (int i = 0; i < _currentWeighted.Count; i++)
+                    {
+                        int w = _currentWeighted[i].Weight;
+                        if (w > 0) total += w;
+                    }
+                    if (total <= 0)
+                        return EnemyType.Unknown;
+
+                    int roll = UnityEngine.Random.Range(1, total + 1);
+                    int acc = 0;
+                    for (int i = 0; i < _currentWeighted.Count; i++)
+                    {
+                        int w = _currentWeighted[i].Weight;
+                        if (w <= 0) continue;
+                        acc += w;
+                        if (roll <= acc)
+                            return _currentWeighted[i].Type;
+                    }
+                    // Fallback
+                    return _currentWeighted[_currentWeighted.Count - 1].Type;
+                }
+
         public void Start()
         {
             _elapsed = 0f;
@@ -122,6 +152,7 @@ namespace Game.Gameplay.Waves
             _winDelaySeconds = 0f;
             _winDelayElapsed = 0f;
             _allowedTypes.Clear();
+            _currentWeighted.Clear();
             _clearElapsed = 0f;
 
             // Immediately enter first wave if any
@@ -279,6 +310,7 @@ namespace Game.Gameplay.Waves
             _betweenElapsed = 0f;
             _clearElapsed = 0f;
             _allowedTypes.Clear(); // pause spawns during intermission
+                        _currentWeighted.Clear();
         }
 
         private void EnterWave(int index)
@@ -295,13 +327,18 @@ namespace Game.Gameplay.Waves
             if (waves != null && index >= 0 && index < waves.Count)
             {
                 var list = waves[index].EnemyTypes;
+                _currentWeighted.Clear();
                 if (list != null && list.Count > 0)
                 {
-                    // Only use explicitly specified enemy types for this wave; ignore Unknown and duplicates
+                    // Build weighted list; ignore Unknown; default weight to 1 if <= 0. Also build unique allowed types for diagnostics/UI.
                     var seen = new System.Collections.Generic.HashSet<Game.Gameplay.Enemies.EnemyType>();
-                    foreach (var t in list)
+                    for (int i = 0; i < list.Count; i++)
                     {
+                        var we = list[i];
+                        var t = we.Type;
                         if (t == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
+                        int w = we.Weight <= 0 ? 1 : we.Weight;
+                        _currentWeighted.Add(new WaveConfig.WeightedEnemy { Type = t, Weight = w });
                         if (seen.Add(t))
                             _allowedTypes.Add(t);
                     }
@@ -329,6 +366,7 @@ namespace Game.Gameplay.Waves
             _finished = true;
             _betweenWaves = false;
             _allowedTypes.Clear();
+            _currentWeighted.Clear();
 
             // Decide whether to wait for all enemies to be cleared before showing WinScreen
             int alive = 0;

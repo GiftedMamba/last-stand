@@ -242,10 +242,11 @@ namespace Game.Gameplay.Enemies
 
             while (!_stopped && _waveService != null && !_waveService.IsFinished)
             {
-                var types = _waveService.AllowedTypes;
-                if (types != null && types.Count > 0)
+                // Pick a random type using weights from current wave
+                var type = _waveService.GetRandomAllowedType();
+                if (type != Game.Gameplay.Enemies.EnemyType.Unknown)
                 {
-                    var cfg = _configProvider.GetRandomForTypes(types);
+                    var cfg = _configProvider.GetRandomForType(type);
                     if (cfg != null)
                     {
                         Vector3 pos = transform.position;
@@ -259,85 +260,13 @@ namespace Game.Gameplay.Enemies
                     else
                     {
                         // Build a stable signature of allowed types to avoid log spam
-                        string signature;
-                        if (types != null && types.Count > 0)
-                        {
-                            // Sort copy for deterministic signature
-                            var copy = new List<Game.Gameplay.Enemies.EnemyType>(types);
-                            copy.Sort();
-                            signature = string.Join(",", copy);
-                        }
-                        else signature = string.Empty;
-
+                        var types = _waveService.AllowedTypes;
+                        string signature = types != null && types.Count > 0 ? string.Join(",", new List<Game.Gameplay.Enemies.EnemyType>(types).ToArray()) : string.Empty;
                         if (_lastMissingTypesSignature != signature)
                         {
                             _lastMissingTypesSignature = signature;
-
-                            // Probe which types are missing configs to help authoring
-                            var missing = new List<Game.Gameplay.Enemies.EnemyType>();
-                            if (types != null)
-                            {
-                                for (int i = 0; i < types.Count; i++)
-                                {
-                                    var t = types[i];
-                                    if (_configProvider.GetRandomForType(t) == null)
-                                        missing.Add(t);
-                                }
-                            }
-
-                            if (missing.Count > 0)
-                            {
-                                Game.Core.GameLogger.LogWarning($"EnemySpawner: No configs found for current wave's allowed types. Missing in catalog: {string.Join(", ", missing)}. Skipping spawn this tick.");
-
-                                // Additionally, log all types currently available in the catalog to aid setup
-                                var available = new System.Collections.Generic.List<Game.Gameplay.Enemies.EnemyType>();
-                                var values = System.Enum.GetValues(typeof(Game.Gameplay.Enemies.EnemyType));
-                                foreach (var v in values)
-                                {
-                                    var et = (Game.Gameplay.Enemies.EnemyType)v;
-                                    if (et == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
-                                    if (_configProvider.GetRandomForType(et) != null)
-                                    {
-                                        available.Add(et);
-                                    }
-                                }
-                                if (available.Count > 0)
-                                {
-                                    Game.Core.GameLogger.Log($"EnemySpawner: Available types in catalog: {string.Join(", ", available)}");
-                                }
-                                else
-                                {
-                                    Game.Core.GameLogger.Log("EnemySpawner: Available types in catalog: <none>");
-                                }
-                            }
-                            else
-                            {
-                                // This should rarely happen, but keep previous message as fallback
-                                Game.Core.GameLogger.LogWarning("EnemySpawner: No configs found for current wave's allowed types. Skipping spawn this tick.");
-
-                                // Additionally, log available catalog types for diagnostics
-                                var available = new System.Collections.Generic.List<Game.Gameplay.Enemies.EnemyType>();
-                                var values = System.Enum.GetValues(typeof(Game.Gameplay.Enemies.EnemyType));
-                                foreach (var v in values)
-                                {
-                                    var et = (Game.Gameplay.Enemies.EnemyType)v;
-                                    if (et == Game.Gameplay.Enemies.EnemyType.Unknown) continue;
-                                    if (_configProvider.GetRandomForType(et) != null)
-                                    {
-                                        available.Add(et);
-                                    }
-                                }
-                                if (available.Count > 0)
-                                {
-                                    Game.Core.GameLogger.Log($"EnemySpawner: Available types in catalog: {string.Join(", ", available)}");
-                                }
-                                else
-                                {
-                                    Game.Core.GameLogger.Log("EnemySpawner: Available types in catalog: <none>");
-                                }
-                            }
+                            Game.Core.GameLogger.LogWarning($"EnemySpawner: No EnemyConfig found for randomly chosen type '{type}'. Check EnemyConfigCatalog for this type.");
                         }
-                        // else: same signature as before, skip repeated warning this frame
                     }
 
                     // wait for pacing delay

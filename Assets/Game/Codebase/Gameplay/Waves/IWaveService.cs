@@ -13,6 +13,12 @@ namespace Game.Gameplay.Waves
         IReadOnlyList<EnemyType> AllowedTypes { get; }
 
         /// <summary>
+        /// Picks a random allowed enemy type using the current wave's per-type weights.
+        /// Returns EnemyType.Unknown when there are no allowed types.
+        /// </summary>
+        EnemyType GetRandomAllowedType();
+
+        /// <summary>
         /// Remaining time in seconds for the current wave. When in an inter-wave timeout,
         /// returns the remaining timeout seconds instead of 0. Returns 0 only when no
         /// active wave and no inter-wave timeout is running (i.e., finished).
