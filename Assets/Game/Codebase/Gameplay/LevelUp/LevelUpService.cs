@@ -19,14 +19,16 @@ namespace Game.Gameplay.LevelUp
         private readonly GlobalAbilityCatalog _catalog;
         private readonly IGlobalAbilityService _abilityService;
         private readonly IHeroAbilityService _heroAbilityService;
+        private readonly PlayerConfig _playerConfig;
 
-        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService, GlobalAbilityCatalog catalog, IGlobalAbilityService abilityService, IHeroAbilityService heroAbilityService)
+        public LevelUpService(IScreenService screenService, IPlayerLevelService playerLevelService, GlobalAbilityCatalog catalog, IGlobalAbilityService abilityService, IHeroAbilityService heroAbilityService, PlayerConfig playerConfig)
         {
             _screenService = screenService;
             _playerLevelService = playerLevelService;
             _catalog = catalog;
             _abilityService = abilityService;
             _heroAbilityService = heroAbilityService;
+            _playerConfig = playerConfig;
         }
 
         public void Start()
@@ -137,13 +139,27 @@ namespace Game.Gameplay.LevelUp
                     }
                     else
                     {
-                        // Simple enumeration over known types; extend when new abilities are added.
-                        var candidates = new System.Collections.Generic.List<HeroAbilityType>
+                        // Build candidate list from PlayerConfig, excluding muted abilities. Fallback to known list if config missing.
+                        var candidates = new System.Collections.Generic.List<HeroAbilityType>();
+                        var fromConfig = _playerConfig != null ? _playerConfig.Abilities : null;
+                        if (fromConfig != null && fromConfig.Count > 0)
                         {
-                            HeroAbilityType.SplitShot,
-                            HeroAbilityType.Pierce,
-                            HeroAbilityType.Crit
-                        };
+                            for (int i = 0; i < fromConfig.Count; i++)
+                            {
+                                var ab = fromConfig[i];
+                                if (ab == null) continue;
+                                if (ab.Type == HeroAbilityType.Unknown) continue;
+                                if (ab.IsMuted) continue; // do not offer muted abilities
+                                candidates.Add(ab.Type);
+                            }
+                        }
+                        if (candidates.Count == 0)
+                        {
+                            // Fallback to legacy hardcoded list to avoid empty UI on older configs
+                            candidates.Add(HeroAbilityType.SplitShot);
+                            candidates.Add(HeroAbilityType.Pierce);
+                            candidates.Add(HeroAbilityType.Crit);
+                        }
                         var upgradableHero = new System.Collections.Generic.List<HeroAbilityType>();
                         for (int i = 0; i < candidates.Count; i++)
                         {

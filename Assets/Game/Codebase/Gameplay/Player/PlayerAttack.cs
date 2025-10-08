@@ -42,6 +42,10 @@ namespace Game.Gameplay.Player
         private bool _loggedNoShootTriggerParam;
         private bool _warnedSplitShotCap;
 
+        // Animator speed override handling for attack animation length adjustments
+        private bool _animSpeedOverridden;
+        private float _storedAnimatorSpeed = 1f;
+
         // Runtime ability levels tracked here (not in config). Missing entries default to 0.
         private readonly Dictionary<HeroAbilityType, int> _abilityLevels = new();
 
@@ -179,12 +183,24 @@ namespace Game.Gameplay.Player
             }
 
             // Attack: trigger animation and defer actual firing to animation event
-            float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed);
+            float atkMul = GetAttackSpeedMultiplierFromAbilities();
+            if (atkMul <= 0f) atkMul = 1f;
+            float atkSpeed = Mathf.Max(0.01f, _config.BaseAttackSpeed * atkMul);
             _cooldown = 1f / atkSpeed; // start cooldown immediately when we commit to an attack
 
             if (_animator != null)
             {
                 _pendingTarget = closest;
+
+                // Adjust animator speed so animation length scales inversely with multiplier
+                float desiredAnimSpeed = 1f / Mathf.Max(0.0001f, atkMul);
+                if (!_animSpeedOverridden)
+                {
+                    _storedAnimatorSpeed = _animator.speed;
+                    _animSpeedOverridden = true;
+                }
+                _animator.speed = desiredAnimSpeed;
+
                 EnsureAnimatorSetupChecked();
                 if (_hasShootTriggerParam)
                 {
@@ -225,6 +241,13 @@ namespace Game.Gameplay.Player
             }
 
             _pendingTarget = null; // clear either way to avoid repeated shots
+
+            // Restore animator speed after attack event processed
+            if (_animator != null && _animSpeedOverridden)
+            {
+                _animator.speed = _storedAnimatorSpeed;
+                _animSpeedOverridden = false;
+            }
         }
 
         private int GetSplitShotCountFromAbilities()
@@ -331,6 +354,38 @@ namespace Game.Gameplay.Player
             }
 
             return 0f;
+        }
+
+        private float GetAttackSpeedMultiplierFromAbilities()
+        {
+            // Default multiplier is 1 (no change) if config or ability not present
+            if (_config == null)
+                return 1f;
+
+            var abilities = _config.Abilities;
+            if (abilities == null)
+                return 1f;
+
+            for (int i = 0; i < abilities.Count; i++)
+            {
+                var ab = abilities[i];
+                if (ab == null || ab.Type != HeroAbilityType.AttackSpeed)
+                    continue;
+
+                var levels = ab.Levels;
+                if (levels == null || levels.Count == 0)
+                    return 1f;
+
+                int idx = GetAbilityLevel(HeroAbilityType.AttackSpeed);
+                if (idx < 0) idx = 0;
+                if (idx >= levels.Count) idx = levels.Count - 1;
+
+                float mul = levels[idx] != null ? levels[idx].Value : 1f; // interpret value as multiplier (e.g., 1.5 = +50% speed)
+                if (mul <= 0f) mul = 1f;
+                return mul;
+            }
+
+            return 1f;
         }
 
         private void FireAt(Enemy target)
