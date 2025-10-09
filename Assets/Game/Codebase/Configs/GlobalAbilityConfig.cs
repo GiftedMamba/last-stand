@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 using Game.Gameplay.Abilities;
+using Ami.BroAudio;
 
 namespace Game.Configs
 {
@@ -23,6 +24,10 @@ namespace Game.Configs
         [Tooltip("Optional VFX prefab to spawn on each affected target when the ability is applied. If null, no VFX will be spawned.")]
         [SerializeField] private GameObject _vfxPrefab;
 
+        [Header("Audio")]
+        [Tooltip("Sound played when this global ability is used.")]
+        [SerializeField] private SoundID _useSfx;
+
         [Header("UI")] 
         [Tooltip("Icon to represent this global ability in UI elements (buttons, tooltips).")]
         [SerializeField] private Sprite _icon;
@@ -30,6 +35,7 @@ namespace Game.Configs
         public GlobalAbility Ability => _ability;
         public IReadOnlyList<GlobalAbilityLevelEntry> Levels => _levels;
         public GameObject VfxPrefab => _vfxPrefab;
+        public SoundID UseSfx => _useSfx;
         public Sprite Icon => _icon;
 
         /// <summary>

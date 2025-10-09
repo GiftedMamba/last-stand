@@ -35,4 +35,8 @@ MonoBehaviour:
     _isPercent: 0
     _splash: 0
   _vfxPrefab: {fileID: 272589623740281236, guid: 2ffc54e016886014aa9e8baffc9b391b, type: 3}
+  _useSfx:
+    ID: 1073741842
+    _sourceAsset: {fileID: 11400000, guid: 5da02e85e5f7bf341a4a4dbbc44d2b0c, type: 2}
+    <DebugObject>k__BackingField: {fileID: 0}
   _icon: {fileID: 21300000, guid: bc7935d9d59f4d9439162ef978e2ed04, type: 3}

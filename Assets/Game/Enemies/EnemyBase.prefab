@@ -109,6 +109,10 @@ MonoBehaviour:
   _skinnedMeshRenderer: {fileID: 0}
   _flashDuration: 0.15
   _flashPower: 2
+  _hitSfx:
+    ID: 1073741838
+    _sourceAsset: {fileID: 11400000, guid: 5da02e85e5f7bf341a4a4dbbc44d2b0c, type: 2}
+    <DebugObject>k__BackingField: {fileID: 756215996396252777}
 --- !u!136 &5733036158280320520
 CapsuleCollider:
   m_ObjectHideFlags: 0

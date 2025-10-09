@@ -5,6 +5,7 @@ using Game.Core.Player;
 using Game.Gameplay.Combat;
 using Game.Gameplay.Enemies;
 using Game.Gameplay.Abilities;
+using Game.Audio;
 using UnityEngine;
 using VContainer;
 
@@ -56,6 +57,7 @@ namespace Game.Gameplay.Player
         // Injected hero ability service (optional). When available, we read current levels from here.
         private IHeroAbilityService _heroAbilityService;
         private IPlayerLevelService _playerLevel;
+        private IAudioService _audioService;
 
         [Inject]
         public void Construct(IHeroAbilityService heroAbilityService)
@@ -67,6 +69,12 @@ namespace Game.Gameplay.Player
         public void Construct(IPlayerLevelService playerLevel)
         {
             _playerLevel = playerLevel;
+        }
+
+        [Inject]
+        public void Construct(IAudioService audioService)
+        {
+            _audioService = audioService;
         }
 
         public void SetAbilityLevel(HeroAbilityType type, int level)
@@ -270,6 +278,16 @@ namespace Game.Gameplay.Player
             // Try to fire at the pending target; if it's null or dead by the time the event fires, reacquire target automatically.
             // IMPORTANT: Do not use manual target here. Manual selection should only take effect on the NEXT attack cycle.
             var origin = _firePoint != null ? _firePoint.position : transform.position;
+
+            // Play attack SFX once per shot
+            if (_audioService != null && _config != null)
+            {
+                if (_firePoint != null)
+                    _audioService.PlaySfx(_config.AttackSfx, _firePoint);
+                else
+                    _audioService.PlaySfx(_config.AttackSfx, origin);
+            }
+
             var target = _pendingTarget;
             if (target == null || target.IsDead)
             {

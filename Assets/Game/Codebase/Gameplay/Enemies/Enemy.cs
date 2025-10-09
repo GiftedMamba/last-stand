@@ -4,6 +4,9 @@ using Game.Gameplay.Spots;
 using Game.Gameplay.Health;
 using UnityEngine;
 using UnityEngine.AI;
+using Ami.BroAudio;
+using Game.Audio;
+using VContainer;
 
 namespace Game.Gameplay.Enemies
 {
@@ -26,6 +29,12 @@ namespace Game.Gameplay.Enemies
         [SerializeField] [Min(0f)] private float _flashDuration = 0.15f;
         [Tooltip("Peak intensity of the flash written to _FlashAmount shader property.")]
         [SerializeField] [Min(0f)] private float _flashPower = 1f;
+
+        [Header("Audio")]
+        [Tooltip("Sound played when this enemy is hit by a player projectile.")]
+        [SerializeField] private SoundID _hitSfx;
+
+        private IAudioService _audio;
 
         private bool _isDying;
 
@@ -79,6 +88,12 @@ namespace Game.Gameplay.Enemies
             {
                 _material.SetFloat(FlashAmountId, 0f);
             }
+        }
+
+        [Inject]
+        public void Inject(IAudioService audio)
+        {
+            _audio = audio;
         }
 
         private void Start()
@@ -205,6 +220,13 @@ namespace Game.Gameplay.Enemies
             _currentHp -= Mathf.Max(1, dmg); // at least 1 dmg
             int dealt = Mathf.Max(0, prev - _currentHp);
             OnDamaged?.Invoke(dealt, _currentHp);
+
+            // Play impact sound if any damage was dealt
+            if (dealt > 0 && _audio != null)
+            {
+                // Follow the enemy so the audio remains spatially correct if it moves mid-playback
+                _audio.PlaySfx(_hitSfx, transform);
+            }
 
             // Trigger flash on hit
             if (_material != null && _flashPower > 0f && _flashDuration > 0f)

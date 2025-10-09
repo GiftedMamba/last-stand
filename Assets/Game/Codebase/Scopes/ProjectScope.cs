@@ -1,5 +1,6 @@
 using Game.Configs;
 using Game.Core.Player;
+using Game.Audio;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -22,6 +23,7 @@ namespace Game.Scopes
             }
 
             builder.Register<IPlayerLevelService, PlayerLevelService>(Lifetime.Singleton);
+            builder.Register<IAudioService, BroAudioSfxService>(Lifetime.Singleton);
         }
     }
 }

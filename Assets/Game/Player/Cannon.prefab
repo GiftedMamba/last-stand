@@ -26,8 +26,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0.0922958, y: -0.7010574, z: -0.092295796, w: 0.70105755}
   m_LocalPosition: {x: -19, y: 9.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 30, y: 30, z: 30}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6141855355188393244}
   m_LocalEulerAnglesHint: {x: -15, y: -90, z: 0}
@@ -137,6 +137,10 @@ MonoBehaviour:
     m_Bits: 64
   _startFireDelay: 0
   _fireCooldown: 1
+  _fireSfx:
+    ID: 1073741840
+    _sourceAsset: {fileID: 11400000, guid: 5da02e85e5f7bf341a4a4dbbc44d2b0c, type: 2}
+    <DebugObject>k__BackingField: {fileID: 6141855355188393235}
 --- !u!4 &6141855355188393244 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3418614552145279298, guid: ea15ebbf367894f6895777bfe09b2903, type: 3}

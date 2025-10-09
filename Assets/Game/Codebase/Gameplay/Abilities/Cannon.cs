@@ -1,5 +1,9 @@
 ﻿using System;
 using UnityEngine;
+using Ami.BroAudio;
+using Game.Audio;
+using VContainer;
+using VContainer.Unity;
 
 namespace Game.Gameplay.Abilities
 {
@@ -23,6 +27,13 @@ namespace Game.Gameplay.Abilities
         [Tooltip("Cooldown between consecutive shots (seconds).")]
         [SerializeField, Min(0f)] private float _fireCooldown = 0.75f;
 
+        [Header("Audio")]
+        [Tooltip("Sound played when the cannon fires.")]
+        [SerializeField] private SoundID _fireSfx;
+
+        private IAudioService _audio;
+        private IObjectResolver _resolver;
+        
         private float _nextReadyTime;
 
         public bool IsReady => (_launchPoint != null) && (_projectilePrefab != null) && Time.time >= _nextReadyTime;
@@ -32,6 +43,13 @@ namespace Game.Gameplay.Abilities
         {
             // Ensure the first shot is delayed by _startFireDelay
             _nextReadyTime = Time.time + Mathf.Max(0f, _startFireDelay);
+        }
+
+        [Inject]
+        public void Inject(IAudioService audio, IObjectResolver resolver)
+        {
+            _audio = audio;
+            _resolver = resolver;
         }
 
         /// <summary>
@@ -69,16 +87,23 @@ namespace Game.Gameplay.Abilities
                 target.y = start.y;
             }
 
-            // Instantiate with explicit world position and rotation so Awake() of the projectile sees correct transform
-            var proj = Instantiate(_projectilePrefab, start, lp.rotation);
+            // Instantiate via VContainer so dependencies on the projectile get injected
+            var proj = _resolver != null
+                ? _resolver.Instantiate(_projectilePrefab, start, lp.rotation, lp)
+                : Instantiate(_projectilePrefab, start, lp.rotation, lp);
 
-            // Ensure projectile starts exactly at LaunchPoint: parent it and zero local transform
+            // Ensure projectile starts exactly at LaunchPoint
             var projTransform = proj.transform;
-            projTransform.SetParent(lp, true);
             projTransform.localPosition = Vector3.zero;
             projTransform.localRotation = Quaternion.identity;
 
             proj.Init(start, target, _arcHeight, _flightTime, onImpact, _groundMask);
+
+            // Play fire SFX at the launch point (follow to keep spatial accuracy if it moves)
+            if (_audio != null)
+            {
+                _audio.PlaySfx(_fireSfx, lp);
+            }
 
             // Set next ready time based on cooldown
             _nextReadyTime = Time.time + Mathf.Max(0f, _fireCooldown);

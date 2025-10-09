@@ -124,3 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecec6746e2b24e29b1b0ec80cb77fc92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Game.Gameplay.Abilities.CannonProjectile
+  _explosionSfx:
+    ID: 1073741839
+    _sourceAsset: {fileID: 11400000, guid: 5da02e85e5f7bf341a4a4dbbc44d2b0c, type: 2}
+    <DebugObject>k__BackingField: {fileID: 8046584956058794293}

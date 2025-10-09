@@ -1,6 +1,9 @@
 ﻿using System;
 using UnityEngine;
 using Game.Gameplay.Enemies;
+using Game.Audio;
+using Ami.BroAudio;
+using VContainer;
 
 namespace Game.Gameplay.Abilities
 {
@@ -20,6 +23,17 @@ namespace Game.Gameplay.Abilities
         private Action<Vector3> _onImpact;
         private Transform _visual;
         private LayerMask _groundMask;
+
+        [Header("Audio")]
+        [Tooltip("Sound played when the projectile explodes on impact.")]
+        [SerializeField] private SoundID _explosionSfx;
+        private IAudioService _audio;
+
+        [Inject]
+        public void Inject(IAudioService audio)
+        {
+            _audio = audio;
+        }
 
         /// <summary>
         /// Initialize the projectile.
@@ -93,6 +107,9 @@ namespace Game.Gameplay.Abilities
                     Vector3 impact = Vector3.Lerp(prevPos, nextPos, alpha);
                     impact.y = groundPoint.y;
                     transform.position = impact;
+                    // Play explosion SFX
+                    if (_audio != null)
+                        _audio.PlaySfx(_explosionSfx, impact);
                     try { _onImpact?.Invoke(impact); } catch (Exception) { }
                     Destroy(gameObject);
                     return;
@@ -110,6 +127,9 @@ namespace Game.Gameplay.Abilities
                 {
                     final = groundAtTarget;
                 }
+                // Play explosion SFX
+                if (_audio != null)
+                    _audio.PlaySfx(_explosionSfx, final);
                 try { _onImpact?.Invoke(final); }
                 catch (Exception) { /* swallow to avoid breaking gameplay loop */ }
                 Destroy(gameObject);

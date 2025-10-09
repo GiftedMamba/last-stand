@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Game.Configs;
 using Game.Core;
+using Game.Audio;
+using UnityEngine;
 
 namespace Game.Gameplay.Abilities
 {
@@ -8,14 +10,16 @@ namespace Game.Gameplay.Abilities
     {
         private readonly GlobalAbilityCatalog _catalog;
         private readonly IGlobalAbilityExecutor _executor;
+        private readonly IAudioService _audio;
 
         // Track current level per ability (starts at 0)
         private readonly Dictionary<GlobalAbility, int> _levels = new();
 
-        public GlobalAbilityService(GlobalAbilityCatalog catalog, IGlobalAbilityExecutor executor)
+        public GlobalAbilityService(GlobalAbilityCatalog catalog, IGlobalAbilityExecutor executor, IAudioService audio)
         {
             _catalog = catalog;
             _executor = executor;
+            _audio = audio;
 
             // Initialize known abilities to level 0
             if (_catalog != null && _catalog.Configs != null)
@@ -41,6 +45,13 @@ namespace Game.Gameplay.Abilities
             var levelIndex = GetLevelIndex(ability);
             var level = BuildLevel(config, levelIndex);
             GameLogger.Log($"[GlobalAbilityService] Triggered {ability} | L{level.LevelIndex} Cooldown={level.Cooldown}s, Duration={level.Duration}s");
+
+            // Play global ability use SFX if configured
+            if (_audio != null)
+            {
+                // Passing null Transform will play non-positional/global SFX in BroAudioSfxService
+                _audio.PlaySfx(config.UseSfx, (Transform)null);
+            }
 
             switch (ability)
             {

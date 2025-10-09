@@ -9,6 +9,7 @@ Project info located under .docs/gamedoc.md; If information in prompt conflicts 
 ALL SCRIPTS SHOULD BE INSIDE ASSETS/GAME/CODEBASE folder.
 DO NOT BUILD SOLUTION INSIDE RIDER
 IMPORTANT: ALL SERVICES SHOULD BE INJECTED VIA VCONTAINER THROUGH METHOD WITH INJECT ATTRIBUTE, NOT RESOLVED INSIDE CLASSES!!!
+USE BROAUDIO API FOR SOUND EFFECTS!!!
 
 Use assembly definitions for scripts to speed up compilation. At least core, gameplay and UI.
 
@@ -159,6 +160,7 @@ IMPORTANT!!! DO NOT USE STATIC METHODS OR EVENTS OUTSIDE LOGGER!!!
 - Use IObjectResolver.Instantiate for creating new objects, not Instantiate to have all dependencies injected.
 - Do not use hardcoded strings. Declare constants in class level, or separate class for similar entities, for isntance ScreenNames.cs
 - You should NEVER EVER control screen game objects outside screenService. Only ScreenService can show, hide, destroy screens.
+- If you need IObjectResolver in entities, which are not services, create factories and use IObjectResolver inside factory. 
 
 ## 8. Layering & Ownership
 
